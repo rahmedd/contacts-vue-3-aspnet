@@ -1,4 +1,4 @@
-export default class LoginReq {
+export default class LoginRequest {
 	public username = ""
 	public password = ""
 

@@ -1,4 +1,4 @@
-export default class UserRes {
+export default class LoginResponse {
 	id: number
 	username: string
 

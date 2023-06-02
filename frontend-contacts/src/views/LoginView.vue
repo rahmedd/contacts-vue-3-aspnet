@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { type FormInst, NForm, NFormItem, NInput, NButton, NCard } from 'naive-ui'
-import { ref } from 'vue';
+import { computed, isRef, ref, unref } from 'vue';
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 
 import { NaiveButtonTypes } from '../enums/NaiveButtonTypes';
 import { NaiveTriggerTypes } from '@/enums/NaiveTriggerTypes';
 import type BaseReponse from '@/responseTypes/BaseResponse';
-import type LoginRes from '@/responseTypes/LoginRes';
-import LoginReq from '@/requestTypes/LoginReq';
+import type LoginResponse from '@/responseTypes/LoginResponse';
+import LoginRequest from '@/requestTypes/LoginRequest';
 
 const formRef = ref<FormInst | null>(null)
-const formValue = ref<LoginReq>({
+const formValue = ref<LoginRequest>({
 	username: 'testuser',
-	password: ''
+	password: 'b'
 })
 
 const rules = {
@@ -31,30 +31,42 @@ const rules = {
 
 const {
 	data: loginRes,
-	isFinished: loginIsFinished,
+	isFinished: loginFinished,
 	execute: loginSendRequest,
-} = useAxios<BaseReponse<LoginRes>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
+} = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
+
+// const inputFeedback = computed(() => {
+// 	if (!loginRes.value?.success && loginRes.value?.message) {
+// 		return loginRes.value.message
+// 	}
+// })
+
+// const inputValidationStatus = computed(() => {
+// 	// If request not complete or success
+// 	if (!loginRes.value) {
+// 		return undefined
+// 	}
+
+// 	if (loginRes.value.success) {
+// 		return 'success' // Does nothing?
+// 	}
+
+// 	return 'error'
+// })
+
+// const passwordFeedback = computed(() => {
+// 	if (!loginRes.value) {
+// 		return
+// 	}
+
+// 	if (!formValue.value.password) {
+// 		return 'Cannot be empty'
+// 	}
+// })
 
 async function submitLogin(evt: Event) {
 	try {
 		evt.preventDefault()
-		// const res = formRef.value?.validate((errors) => {
-		// 	if (!errors) {
-		// 		console.log('submitted!')
-		// 	}
-		// 	else {
-		// 		console.log(errors)
-		// 	}
-		// })
-		// res?.then(x => x).catch(y => y)
-		// const res = await formRef.value?.validate((errors) => {
-		// 	if (!errors) {
-		// 		console.log('submitted!')
-		// 	}
-		// 	else {
-		// 		console.log(errors)	
-		// 	}
-		// })
 		await formRef.value?.validate()
 	}
 	catch (errors) {
@@ -63,14 +75,18 @@ async function submitLogin(evt: Event) {
 	}
 
 	try {
-		const res = await loginSendRequest({
+		const { data } = await loginSendRequest({
 			data: {
 				Username: formValue.value.username,
 				Password: formValue.value.password
 			}
 		})
 
-		console.log(loginRes.value?.body.id)
+		const res = unref(data)!
+
+		if (!res.success) {
+			
+		}
 	}
 	catch (ex) {
 		console.log('Error: submitLogin request failed')
@@ -93,7 +109,10 @@ div.login-page-vertical
 					NFormItem(label="Username" path="username")
 						NInput(v-model:value="formValue.username" placeholder="Username" @keyup.enter="submitLogin")
 					NFormItem(label="Password" path="password")
-						NInput(v-model:value="formValue.password" placeholder="Password" @keyup.enter="submitLogin")
+						NInput(v-model:value="formValue.password" placeholder="Password" @keyup.enter="submitLogin" type="password" show-password-on="mousedown" :maxlength="8")
+				template(#footer)
+					div.login-error
+						span(v-if="loginRes?.success === false") {{ loginRes?.message }}
 				template(#action)
 					div.button-bar
 						div.button-bar-align
@@ -119,6 +138,14 @@ div.login-page-vertical
 }
 .login-title {
 	margin: 0;
+}
+
+.login-error {
+	height: 32px;
+	// background: red;
+	// color: white;
+	color: red;
+	text-align: center;
 }
 .button-bar {
 	display: flex;

@@ -39,8 +39,8 @@ public class AuthController : ControllerBase
 		var user = new User()
 		{
 			Username = signup.Username,
-			Password = signup.Password,
-			CreatedAt = DateTime.UtcNow,
+			Password = signup.Password, // TODO: Use password hash/function
+            CreatedAt = DateTime.UtcNow,
 		};
 
 		await _context.Users.AddAsync(user);
@@ -66,9 +66,10 @@ public class AuthController : ControllerBase
 		}
 
 		User user = await _context.Users.FirstOrDefaultAsync(m => m.Username == loginDto.Username);
-		if (user == null)
+		// TODO: Use password hash/function
+		if (user == null || user.Password != loginDto.Password)
 		{
-			return BadRequest(new BaseResponseEmpty() { Success = false, Message = "Error logging in" });
+			return Ok(new BaseResponseEmpty() { Success = false, Message = "Username or password is incorrect" });
 		}
 
 		var claims = new List<Claim>
@@ -122,4 +123,12 @@ public class AuthController : ControllerBase
 		var res = new BaseResponse<UserDto> { Success = true, Message = "", Body = userDto };
 		return Ok(res);
 	}
+
+    [HttpPost("Logout")]
+    public async Task<ActionResult<BaseResponseEmpty>> PostLogout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        var res = new BaseResponseEmpty { Success = true, Message = "Successfully logged out" };
+        return Ok(res);
+    }
 }
