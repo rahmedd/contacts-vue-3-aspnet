@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { NConfigProvider } from 'naive-ui'
 
 </script>
 
 <template>
-	<NConfigProvider>
-		<RouterView />
-	</NConfigProvider>
+	<RouterView />
 </template>
 
-<style scoped>
-
+<style>
+@import url('halfmoon/css/halfmoon.css');
+/* * { outline: 1px solid red; } */
 </style>

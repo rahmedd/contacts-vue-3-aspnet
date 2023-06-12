@@ -1,33 +1,40 @@
 <script setup lang="ts">
-import { type FormInst, NForm, NFormItem, NInput, NButton, NCard } from 'naive-ui'
 import { computed, isRef, ref, unref } from 'vue';
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 
-import { NaiveButtonTypes } from '../enums/NaiveButtonTypes';
-import { NaiveTriggerTypes } from '@/enums/NaiveTriggerTypes';
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type LoginResponse from '@/responseTypes/LoginResponse';
 import LoginRequest from '@/requestTypes/LoginRequest';
+import { FullmoonTypes } from '@/fullmoon/FullmoonTypes'
+import FButton from '@/fullmoon/FButton.vue'
+import FCard from '@/fullmoon/FCard.vue'
+import FInput from '@/fullmoon/FInput.vue'
+import { configure, useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import {
+	object as zobject,
+	string as zstring
+} from 'zod';
 
-const formRef = ref<FormInst | null>(null)
+const formSchema = toTypedSchema(zobject({
+	username: zstring()
+		.nonempty()
+	,
+	password: zstring()
+		.nonempty()
+		// .min(12, { message: 'Passsword must be at least 12 characters long' })
+	,
+}))
+
 const formValue = ref<LoginRequest>({
-	username: 'testuser',
-	password: 'b'
+	username: '',
+	password: ''
 })
 
-const rules = {
-	username: {
-		required: true,
-		message: 'Username required',
-		trigger: NaiveTriggerTypes.Blur
-	},
-	password: {
-		required: true,
-		message: 'Password required',
-		trigger: NaiveTriggerTypes.Blur
-	},
-}
+const { errors, errorBag, validate } = useForm({
+	validationSchema: formSchema
+})
 
 const {
 	data: loginRes,
@@ -35,39 +42,14 @@ const {
 	execute: loginSendRequest,
 } = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
 
-// const inputFeedback = computed(() => {
-// 	if (!loginRes.value?.success && loginRes.value?.message) {
-// 		return loginRes.value.message
-// 	}
-// })
-
-// const inputValidationStatus = computed(() => {
-// 	// If request not complete or success
-// 	if (!loginRes.value) {
-// 		return undefined
-// 	}
-
-// 	if (loginRes.value.success) {
-// 		return 'success' // Does nothing?
-// 	}
-
-// 	return 'error'
-// })
-
-// const passwordFeedback = computed(() => {
-// 	if (!loginRes.value) {
-// 		return
-// 	}
-
-// 	if (!formValue.value.password) {
-// 		return 'Cannot be empty'
-// 	}
-// })
-
 async function submitLogin(evt: Event) {
+	evt.preventDefault()
+
 	try {
-		evt.preventDefault()
-		await formRef.value?.validate()
+		const res = await validate()
+		if (!res.valid) {
+			return
+		}
 	}
 	catch (errors) {
 		console.log('Error: submitLogin validation failed')
@@ -99,28 +81,30 @@ async function submitLogin(evt: Event) {
 </script>
 
 <template lang="pug">
-div.login-page-vertical
-	div.login-page-horizontal
-		div.login-card
-			NCard
-				template(#header)
-					h2.login-title Login
-				NForm(ref="formRef" :model="formValue" :rules="rules")
-					NFormItem(label="Username" path="username")
-						NInput(v-model:value="formValue.username" placeholder="Username" @keyup.enter="submitLogin")
-					NFormItem(label="Password" path="password")
-						NInput(v-model:value="formValue.password" placeholder="Password" @keyup.enter="submitLogin" type="password" show-password-on="mousedown" :maxlength="8")
-				template(#footer)
-					div.login-error
-						span(v-if="loginRes?.success === false") {{ loginRes?.message }}
-				template(#action)
-					div.button-bar
-						div.button-bar-align
-							NButton(:type="NaiveButtonTypes.Default" @click="submitLogin") Sign Up
-							NButton(:type="NaiveButtonTypes.Primary" @click="submitLogin") Login
+.login-page-vertical
+	.modal-content
+		a.btn.close(href='#' role='button' aria-label='Close')
+			span(aria-hidden='true') ×
+		h5.modal-title Sign in to your account
+		form(action='...' method='...' @submit="submitLogin")
+			.form-group
+				label.required(for='Username') Username
+				FInput#username(type='text' placeholder='Username' name='username' v-model='formValue.username')
+			.form-group
+				label.required(for='Password') Password
+				FInput#username(type='text' placeholder='Password' name='password' v-model='formValue.password')
+			input.btn.btn-primary.btn-block(type='submit' value='Sign in')
+		.text-right.mt-10
+			// text-right = text-align: right, margin-top: 1rem (10px)
+			a.hyperlink(href='#modal-2') Forgot password?
+			// hyperlink = used on regular links to remove anti-aliasing in dark mode
 </template>
 
 <style lang="scss" scoped>
+// override halfmoon margin
+.form-group {
+	margin-bottom: 8px;
+}
 .login-page-vertical {
 	display: flex;
 	flex-direction: column;
@@ -134,10 +118,11 @@ div.login-page-vertical
 }
 .login-card {
 	width: 512px;
-	box-shadow: 5px 5px 20px gainsboro
 }
 .login-title {
-	margin: 0;
+	font-size: 32px;
+	font-weight: 500;
+	// background: gainsboro;
 }
 
 .login-error {
