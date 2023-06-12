@@ -17,7 +17,7 @@ const emits = defineEmits(['update:modelValue'])
 const { value, errorMessage, errors, meta, handleBlur, setTouched, validate } = useField(() => props.name);
 
 const classObject = computed(() => ({
-	'form-control': true,
+	'input': true,
 	'is-invalid': !meta.valid && meta.validated && !meta.pending
 }))
 
@@ -30,7 +30,8 @@ function validateOnBlur (evt: Event) {
 </script>
 
 <template lang="pug">
-div.f-input
+div.field
+	label.label Username
 	input(
 		v-model="value"
 		type="text"
@@ -38,19 +39,19 @@ div.f-input
 		:placeholder="placeholder"
 		@blur="validateOnBlur"
 	)
-	div.f-input-error {{ errorMessage }}
+	div.help.is-danger {{ errorMessage }}
 </template>
 
 <style lang="scss" scoped>
-.f-input {
-	display: flex;
-	flex-direction: column;
-	height: 60px;
-}
-.f-input > input {
-	margin-bottom: 2px;
-}
-.f-input-error {
-	color: #ff4d4f;
-}
+// .f-input {
+// 	display: flex;
+// 	flex-direction: column;
+// 	height: 60px;
+// }
+// .f-input > input {
+// 	margin-bottom: 2px;
+// }
+// .f-input-error {
+// 	color: #ff4d4f;
+// }
 </style>

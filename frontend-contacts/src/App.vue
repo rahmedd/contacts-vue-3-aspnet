@@ -8,6 +8,5 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style>
-@import url('halfmoon/css/halfmoon.css');
 /* * { outline: 1px solid red; } */
 </style>

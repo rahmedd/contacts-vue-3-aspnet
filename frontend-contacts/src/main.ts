@@ -1,5 +1,4 @@
 import './assets/main.css'
-import 'halfmoon/css/halfmoon.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
