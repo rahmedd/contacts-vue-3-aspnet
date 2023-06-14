@@ -1,8 +1,9 @@
-$bl-background: #f5f2ea;
-$bl-primary: #fdc886;
+@import 'vars';
+@import "@fontsource/inter";
 
+$family-primary: 'Inter';
 $primary: $bl-primary;
-$text: black;
+// $text: black;
 
 @import 'bulma/bulma';
 

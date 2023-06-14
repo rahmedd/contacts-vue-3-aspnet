@@ -95,60 +95,54 @@ async function submitLogin(evt: Event) {
 		.card
 			.card-content
 				.content
-					h2.login-title Login
-					h5(style="text-align: center;") Hey, Enter your details to get signed into your account
+					h1.login-title Login
 				BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')
 				BInput#password(placeholder='Password' name='password' v-model='formValue.password')
-				p Having trouble signing in?
-				BButton(:type="BloomaTypes.Primary").login-btn Sign in
+				.login-button-container
+					BButton(:type="BloomaTypes.Primary" @click="submitLogin").login-btn Login
+					BButton(:type="BloomaTypes.Default" :light="true" @click="").login-btn Signup
 				p Don't have an account? Signup Now
 
 
 </template>
 
 <style lang="scss" scoped>
+@import '@/blooma/vars.scss';
+
+.card {
+	// border-radius: 2rem;
+	box-shadow: none;
+	background: #f9fcf8;
+}
+
 .card-content {
 	padding: 3.5rem;
 }
 .card-footer {
 	border-top: none;
 }
-
-.card {
-	border-radius: 2rem;
-}
-
-.signup-now {
-	display: flex;
-	flex-direction: column;
-}
-
 .login-title {
-	text-align: center;
-	font-weight: 700;
+	font-weight: 600;
 }
 
 .login-btn {
 	width: 100%;
-	font-weight: 700;
 }
 
 .modal-background {
-	background: #f5f2ea;
-}
-
-// .login-input {
-// 	input {
-// 		height: 2.8em;
-// 		box-shadow: none;
-// 	}
-// }
-
-.card {
-	box-shadow: none;
+	background: $bl-background;
 }
 .modal-content {
-	box-shadow: 5px 5px 20px gainsboro;
-	border-radius: 50px;
+	// box-shadow: 5px 5px 20px gainsboro;
+	// border-radius: 2rem;
+}
+
+.login-button-container {
+	display: flex;
+	flex-direction: column;
+
+	.button {
+		margin-bottom: 1em;
+	}
 }
 </style>

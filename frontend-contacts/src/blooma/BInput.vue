@@ -44,13 +44,14 @@ div.field
 
 <style lang="scss" scoped>
 .field {
-	height: 6rem;
+	height: 5.5rem;
 }
 
 .label {
 	font-size: 0.9rem;
 	font-weight: 600;
-	margin-bottom: 0.2em;
+	// margin-bottom: 0.4em;
+	color: #03363e;
 }
 
 // .f-input {
