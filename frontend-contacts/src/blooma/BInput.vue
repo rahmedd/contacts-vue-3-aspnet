@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, type PropType, computed } from 'vue';
-import { FullmoonTypes } from '@/fullmoon/FullmoonTypes';
+import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 import { useField } from 'vee-validate';
 
 const props = defineProps({
@@ -18,7 +18,7 @@ const { value, errorMessage, errors, meta, handleBlur, setTouched, validate } = 
 
 const classObject = computed(() => ({
 	'input': true,
-	'is-invalid': !meta.valid && meta.validated && !meta.pending
+	'is-danger': !meta.valid && meta.validated && !meta.pending
 }))
 
 function validateOnBlur (evt: Event) {
@@ -31,7 +31,7 @@ function validateOnBlur (evt: Event) {
 
 <template lang="pug">
 div.field
-	label.label Username
+	label.label {{ props.placeholder }}
 	input(
 		v-model="value"
 		type="text"
@@ -43,6 +43,16 @@ div.field
 </template>
 
 <style lang="scss" scoped>
+.field {
+	height: 6rem;
+}
+
+.label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	margin-bottom: 0.2em;
+}
+
 // .f-input {
 // 	display: flex;
 // 	flex-direction: column;

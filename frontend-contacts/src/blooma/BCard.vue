@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue';
-import { FullmoonTypes } from '@/fullmoon/FullmoonTypes';
+import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 
 const props = defineProps({
 	disabled: {
@@ -8,8 +8,8 @@ const props = defineProps({
 		default: false
 	},
 	type: {
-		type: String as PropType<FullmoonTypes>,
-		validator: (value: FullmoonTypes) => Object.values(FullmoonTypes).includes(value)
+		type: String as PropType<BloomaTypes>,
+		validator: (value: BloomaTypes) => Object.values(BloomaTypes).includes(value)
 	},
 })
 

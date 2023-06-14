@@ -1,0 +1,12 @@
+$bl-background: #f5f2ea;
+$bl-primary: #fdc886;
+
+$primary: $bl-primary;
+$text: black;
+
+@import 'bulma/bulma';
+
+.input {
+	box-shadow: none;
+}
+

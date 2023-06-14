@@ -1,9 +1,11 @@
-export enum FullmoonTypes {
-	Primary = 'btn-primary',
-	Secondary = 'btn-secondary',
-	Success = 'btn-success',
-	Danger = 'btn-danger',
-	Link = 'btn-link',
+export enum BloomaTypes {
+	Default = '',
+	Primary = 'is-primary',
+	Link = 'is-link',
+	Info = 'is-info',
+	Success = 'is-success',
+	Warning = 'is-warning',
+	Danger = 'is-danger',
 }
 
 // export const FullmoonTypesList: FullmoonTypes[] = [
