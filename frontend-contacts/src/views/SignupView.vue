@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, unref } from 'vue';
+import { RouterLink } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 import { useForm } from 'vee-validate';
@@ -10,25 +11,32 @@ import {
 } from 'zod';
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type LoginResponse from '@/responseTypes/LoginResponse';
-import LoginRequest from '@/requestTypes/LoginRequest';
+import SignupRequest from '@/requestTypes/SignupRequest';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
 
-const formSchema = toTypedSchema(zobject({
-	username: zstring()
-		.nonempty()
-	,
-	password: zstring()
-		.nonempty()
-		// .min(12, { message: 'Passsword must be at least 12 characters long' })
-	,
-}))
+const formSchema = toTypedSchema(
+	zobject({
+		username: zstring()
+			.nonempty()
+		,
+		password: zstring()
+			.nonempty()
+			// .min(12, { message: 'Passsword must be at least 12 characters long' })
+		,
+		confirmPassword: zstring()
+			.nonempty()
+			.refine(s => s === formValue.value.password)
+		,
+	})
+)
 
-const formValue = ref<LoginRequest>({
+const formValue = ref<SignupRequest>({
 	username: '',
-	password: ''
+	password: '',
+	confirmPassword: ''
 })
 
 const { errors, errorBag, validate } = useForm({
@@ -41,7 +49,7 @@ const {
 	execute: loginSendRequest,
 } = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
 
-async function submitLogin(evt: Event) {
+async function submitSignup(evt: Event) {
 	evt.preventDefault()
 
 	try {
@@ -51,7 +59,7 @@ async function submitLogin(evt: Event) {
 		}
 	}
 	catch (errors) {
-		console.log('Error: submitLogin validation failed')
+		console.log('Error: submitSignup validation failed')
 		return
 	}
 
@@ -70,11 +78,9 @@ async function submitLogin(evt: Event) {
 		}
 	}
 	catch (ex) {
-		console.log('Error: submitLogin request failed')
+		console.log('Error: submitSignup request failed')
 		console.log(ex)
 	}
-
-	
 }
 
 </script>
@@ -82,13 +88,14 @@ async function submitLogin(evt: Event) {
 <template lang="pug">
 LoginForm
 	.login-container
-		h1.login-title Login
+		h1.login-title Sign Up
 		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')
 		BInput#password(placeholder='Password' name='password' v-model='formValue.password')
+		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword')
 		.field
-			BButton(:type="BloomaTypes.Primary" @click="submitLogin").login-btn Log in
+			BButton(:type="BloomaTypes.Primary" @click="submitSignup").login-btn Sign Up
 		.login-button-container
-			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/signup")') Sign Up
+			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/login")') Login
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/deno")') Demo
 </template>
 
@@ -128,6 +135,7 @@ LoginForm
 .login-signup-link {
 	color: $bl-link;
 }
+
 .login-button-container {
 	display: flex;
 	// flex-direction: column;

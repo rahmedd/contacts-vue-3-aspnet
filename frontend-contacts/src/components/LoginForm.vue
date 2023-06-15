@@ -1,44 +1,32 @@
-<!-- <script setup lang="ts">
-import { type FormInst, NForm, NFormItem, NInput, NButton } from 'naive-ui'
-import { ref } from 'vue';
-import { NaiveButtonTypes } from '@/Enums/NaiveButtonTypes';
-import { NaiveTriggerTypes } from '@/Enums/NaiveTriggerTypes';
-
-const formRef = ref<FormInst | null>(null)
-const formValue = ref({
-	username: '',
-	password: ''
-})
-
-const rules = {
-	username: {
-		required: true,
-		message: 'Username required',
-		trigger: NaiveTriggerTypes.Blur
-	},
-	password: {
-		required: true,
-		message: 'Password required',
-		trigger: NaiveTriggerTypes.Blur
-	},
-}
-
-async function submitLogin(e: any) {
-	e.preventDefault()
-	console.log('submitted!')
-}
+<script setup lang="ts">
 
 </script>
 
 <template lang="pug">
-NForm(ref="formRef" :model="formValue" :rules="rules")
-	NFormItem(label="Username" path="username")
-		NInput(v-model:value="formValue.username" placeholder="Username")
-	NFormItem(label="Password" path="password")
-		NInput(v-model:value="formValue.password" placeholder="Password")
-	NButton(:type="NaiveButtonTypes.Primary" @click="submitLogin") Login
+.hero.is-fullheight
+	.hero-body
+		.container
+			slot
 </template>
 
-<style lang="sass" scoped>
+<style lang="scss" scoped>
+@import '@/blooma/vars.scss';
+@import "../node_modules/bulma/sass/utilities/initial-variables.sass"; // breakpoints
+.hero {
+	background: $bl-background-secondary;
+}
 
-</style> -->
+.hero-body {
+	background: $bl-background;
+	width: $tablet;
+	// box-shadow: 5px 5px 20px gainsboro;
+	box-shadow: 0px 5px 20px rgb(0 0 0 / 10%);
+}
+
+@media screen and (max-width: $tablet) {
+	.hero-body {
+		width: 100%;
+		padding: 0;
+	}
+}
+</style>
