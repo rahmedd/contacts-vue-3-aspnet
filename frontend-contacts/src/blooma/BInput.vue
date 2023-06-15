@@ -49,7 +49,7 @@ div.field
 
 .label {
 	font-size: 0.9rem;
-	font-weight: 600;
+	font-weight: 500;
 	// margin-bottom: 0.4em;
 	color: #03363e;
 }
