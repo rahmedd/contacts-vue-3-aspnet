@@ -14,7 +14,12 @@ const props = defineProps({
 
 const emits = defineEmits(['update:modelValue'])
 
-const { value, errorMessage, errors, meta, handleBlur, setTouched, validate } = useField(() => props.name);
+const { value, errorMessage, errors, meta, handleBlur, setTouched, validate } = useField(() => props.name,
+	undefined, // validator is provided by form
+	{
+		validateOnValueUpdate: false
+	}
+);
 
 const classObject = computed(() => ({
 	'input': true,

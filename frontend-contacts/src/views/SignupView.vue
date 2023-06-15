@@ -20,15 +20,14 @@ import LoginForm from '@/components/LoginForm.vue'
 const formSchema = toTypedSchema(
 	zobject({
 		username: zstring()
-			.nonempty()
+			.min(4, { message: 'Username must be at least 4 characters long' })
 		,
 		password: zstring()
-			.nonempty()
-			// .min(12, { message: 'Passsword must be at least 12 characters long' })
+			.min(8, { message: 'Passsword must be at least 8 characters long' })
 		,
 		confirmPassword: zstring()
-			.nonempty()
-			.refine(s => s === formValue.value.password)
+			.min(8, { message: 'Passsword must be at least 8 characters long' })
+			.refine(s => s === formValue.value.password, { message: 'Passwords do not match' })
 		,
 	})
 )
