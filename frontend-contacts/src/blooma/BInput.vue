@@ -53,16 +53,4 @@ div.field
 	// margin-bottom: 0.4em;
 	color: #03363e;
 }
-
-// .f-input {
-// 	display: flex;
-// 	flex-direction: column;
-// 	height: 60px;
-// }
-// .f-input > input {
-// 	margin-bottom: 2px;
-// }
-// .f-input-error {
-// 	color: #ff4d4f;
-// }
 </style>

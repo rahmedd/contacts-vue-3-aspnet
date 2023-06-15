@@ -5,7 +5,7 @@ export enum BloomaTypes {
 	Dark = 'is-dark',
 	Black = 'is-black',
 	Text = 'is-text',
-	Ghost = 'is-light',
+	Ghost = 'is-ghost',
 	Primary = 'is-primary',
 	Link = 'is-link',
 	Info = 'is-info',
