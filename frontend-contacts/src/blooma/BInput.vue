@@ -30,7 +30,8 @@ const controlClasses = computed(() => ({
 
 const inputClasses = computed(() => ({
 	'input': true,
-	'is-danger': !meta.valid && meta.validated && !meta.pending
+	'is-danger': !meta.valid && meta.validated && !meta.pending,
+	'is-success': meta.valid && meta.validated && !meta.pending,
 }))
 
 const validationIcon = computed(() => ({
@@ -60,8 +61,8 @@ div.field
 			icon(:icon="icon")
 		span.icon.is-small.is-right
 			template(v-if="meta.touched")
-				icon(v-if="inputClasses['is-danger']" icon='ic:baseline-error' class="field-icon-error" width="24")
-				icon(v-else icon='ic:round-check' class="field-icon-success" width="24")
+				icon(v-if="inputClasses['is-danger']" icon="icon-park-solid:attention" class="field-icon-error" width="22")
+				icon(v-else icon='icon-park-solid:check-one' class="field-icon-success" width="22")
 
 
 	div.help.is-danger {{ errorMessage }}
@@ -70,7 +71,7 @@ div.field
 <style lang="scss" scoped>
 @import '@/blooma/vars.scss';
 @import "../node_modules/bulma/sass/utilities/initial-variables.sass"; // breakpoints
-@import "../node_modules/bulma/sass/utilities/derived-variables.sass"; // breakpoints
+@import "../node_modules/bulma/sass/utilities/derived-variables.sass"; // color variables
 
 .field {
 	height: 5.5rem;
@@ -84,11 +85,15 @@ div.field
 }
 
 .field-icon-success {
-	// color: $success;
-	color: $bl-primary;
+	color: $success;
+	// color: $bl-primary;
 }
 
 .field-icon-error {
 	color: $danger;
+}
+
+.input.is-success {
+	// border-color: $bl-primary;
 }
 </style>

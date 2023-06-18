@@ -38,7 +38,7 @@ const formValue = ref<SignupRequest>({
 	confirmPassword: ''
 })
 
-const { errors, errorBag, validate } = useForm({
+const { errors, validate, submitForm } = useForm({
 	validationSchema: formSchema
 })
 
@@ -52,10 +52,12 @@ async function submitSignup(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		const res = await validate()
-		if (!res.valid) {
-			return
-		}
+		// const res = await validate()
+		// if (!res.valid) {
+		// 	return
+		// }
+
+		await submitForm()
 	}
 	catch (errors) {
 		console.log('Error: submitSignup validation failed')

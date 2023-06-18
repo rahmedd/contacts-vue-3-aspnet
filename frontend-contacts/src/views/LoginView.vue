@@ -26,10 +26,10 @@ const authStore = useAuthStore()
 
 const formSchema = toTypedSchema(zobject({
 	username: zstring()
-		.nonempty()
+		.nonempty({ message: 'Required' })
 	,
 	password: zstring()
-		.nonempty()
+		.nonempty({ message: 'Required' })
 		// .min(12, { message: 'Passsword must be at least 12 characters long' })
 	,
 }))
@@ -39,7 +39,7 @@ const formValue = ref<LoginRequest>({
 	password: ''
 })
 
-const { errors, errorBag, validate } = useForm({
+const { errors, validate, submitForm } = useForm<LoginRequest>({
 	validationSchema: formSchema
 })
 
@@ -53,10 +53,12 @@ async function submitLogin(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		const res = await validate()
-		if (!res.valid) {
-			return
-		}
+		// const validationRes = await validate()
+		// if (!validationRes.valid) {
+		// 	return
+		// }
+
+		await submitForm()
 	}
 	catch (errors) {
 		console.log('Error: submitLogin validation failed')
