@@ -1,20 +1,28 @@
 <script setup lang="ts">
-import { computed, ref, unref } from 'vue';
+import { ref, unref } from 'vue';
+import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
-import apiClient from '@/services/axios';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import {
 	object as zobject,
 	string as zstring
 } from 'zod';
+
+import apiClient from '@/services/axios';
+import { useAuthStore } from '@/stores/auth'
+
 import type BaseReponse from '@/responseTypes/BaseResponse';
-import type LoginResponse from '@/responseTypes/LoginResponse';
+import type User from '@/responseTypes/User';
 import LoginRequest from '@/requestTypes/LoginRequest';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
+
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const formSchema = toTypedSchema(zobject({
 	username: zstring()
@@ -39,7 +47,7 @@ const {
 	data: loginRes,
 	isFinished: loginFinished,
 	execute: loginSendRequest,
-} = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
+} = useAxios<BaseReponse<User>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
 
 async function submitLogin(evt: Event) {
 	evt.preventDefault()
@@ -65,9 +73,14 @@ async function submitLogin(evt: Event) {
 
 		const res = unref(data)!
 
-		if (!res.success) {
-			
+		if (!res.success || !res.body) {
+			authStore.login(false, res.body)
+
+			return
 		}
+		authStore.login(true, res.body)
+
+		router.push('/contact')
 	}
 	catch (ex) {
 		console.log('Error: submitLogin request failed')
