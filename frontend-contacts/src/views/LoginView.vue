@@ -53,10 +53,10 @@ async function submitLogin(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		// const validationRes = await validate()
-		// if (!validationRes.valid) {
-		// 	return
-		// }
+		const validationRes = await validate()
+		if (!validationRes.valid) {
+			return
+		}
 
 		await submitForm()
 	}
@@ -88,10 +88,7 @@ async function submitLogin(evt: Event) {
 		console.log('Error: submitLogin request failed')
 		console.log(ex)
 	}
-
-	
 }
-
 </script>
 
 <template lang="pug">
@@ -109,7 +106,7 @@ LoginForm
 
 <style lang="scss" scoped>
 @import '@/blooma/vars.scss';
-@import "../node_modules/bulma/sass/utilities/initial-variables.sass"; // breakpoints
+@import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
 .login-container {
 	height: 100%;
@@ -117,17 +114,6 @@ LoginForm
 	display: flex;
 	flex-direction: column;
 	margin: 0 auto;
-}
-
-.hero {
-	background: $bl-background-secondary;
-}
-
-.hero-body {
-	background: $bl-background;
-	width: $tablet;
-	// box-shadow: 5px 5px 20px gainsboro;
-	box-shadow: 0px 5px 20px rgb(0 0 0 / 10%);
 }
 
 .login-title {

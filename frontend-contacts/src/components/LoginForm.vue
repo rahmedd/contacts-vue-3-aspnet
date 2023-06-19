@@ -11,7 +11,7 @@
 
 <style lang="scss" scoped>
 @import '@/blooma/vars.scss';
-@import "../node_modules/bulma/sass/utilities/initial-variables.sass"; // breakpoints
+@import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 .hero {
 	background: $bl-background-secondary;
 }

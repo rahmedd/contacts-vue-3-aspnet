@@ -11,7 +11,8 @@ import {
 } from 'zod';
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type LoginResponse from '@/responseTypes/LoginResponse';
-import SignupRequest from '@/requestTypes/SignupRequest';
+import type SignupRequest from '@/requestTypes/SignupRequest';
+import type UsernameRequest from '@/requestTypes/UsernameRequest';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
@@ -38,7 +39,7 @@ const formValue = ref<SignupRequest>({
 	confirmPassword: ''
 })
 
-const { errors, validate, submitForm } = useForm({
+const { errors, validate, submitForm } = useForm<SignupRequest>({
 	validationSchema: formSchema
 })
 
@@ -48,14 +49,20 @@ const {
 	execute: loginSendRequest,
 } = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
 
+const {
+	data: checkUsernameRes,
+	isFinished: checkUsernameFinished,
+	execute: checkUsernameRequest,
+} = useAxios<BaseReponse<UsernameRequest>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false })
+
 async function submitSignup(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		// const res = await validate()
-		// if (!res.valid) {
-		// 	return
-		// }
+		const res = await validate()
+		if (!res.valid) {
+			return
+		}
 
 		await submitForm()
 	}
@@ -83,7 +90,6 @@ async function submitSignup(evt: Event) {
 		console.log(ex)
 	}
 }
-
 </script>
 
 <template lang="pug">
@@ -102,7 +108,7 @@ LoginForm
 
 <style lang="scss" scoped>
 @import '@/blooma/vars.scss';
-@import "../node_modules/bulma/sass/utilities/initial-variables.sass"; // breakpoints
+@import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
 .login-container {
 	height: 100%;
@@ -110,17 +116,6 @@ LoginForm
 	display: flex;
 	flex-direction: column;
 	margin: 0 auto;
-}
-
-.hero {
-	background: $bl-background-secondary;
-}
-
-.hero-body {
-	background: $bl-background;
-	width: $tablet;
-	// box-shadow: 5px 5px 20px gainsboro;
-	box-shadow: 0px 5px 20px rgb(0 0 0 / 10%);
 }
 
 .login-title {
