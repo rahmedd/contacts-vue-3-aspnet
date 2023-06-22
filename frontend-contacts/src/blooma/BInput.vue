@@ -8,14 +8,18 @@ const props = defineProps({
 	modelValue: String,
 	name: {
 		type: String,
-		required: true
+		required: true,
 	},
 	loading: {
 		type: Boolean,
-		default: false
+		default: false,
 	},
 	placeholder: String,
 	icon: String,
+	showSuccess: {
+		type: Boolean,
+		default: false,
+	}
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -34,7 +38,7 @@ const inputClasses = computed(() => {
 		'input': true,
 		'validated': validated,
 		'is-danger': validated && !meta.valid,
-		'is-success': validated && meta.valid,
+		'is-success': validated && meta.valid && props.showSuccess,
 	}
 })
 
@@ -135,13 +139,13 @@ div.field
 }
 
 .input {
-	transition: border-color 0.1s ease;
+	transition: border-color 0.2s ease;
 }
 
 /* we will explain what these classes do next! */
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.1s ease;
+  transition: opacity 0.2s ease;
 }
 
 .v-enter-from,

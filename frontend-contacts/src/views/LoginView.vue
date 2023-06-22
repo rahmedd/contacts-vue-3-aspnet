@@ -94,14 +94,14 @@ async function submitLogin(evt: Event) {
 <template lang="pug">
 LoginForm
 	.login-container
-		h1.login-title Login
+		h1.login-title Log in
 		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')
 		BInput#password(placeholder='Password' name='password' v-model='formValue.password')
 		.field
 			BButton(:type="BloomaTypes.Primary" @click="submitLogin").login-btn Log in
 		.login-button-container
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/signup")') Sign Up
-			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/deno")') Demo
+			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/demo")') Demo
 </template>
 
 <style lang="scss" scoped>

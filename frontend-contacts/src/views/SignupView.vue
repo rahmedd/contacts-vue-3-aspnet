@@ -95,15 +95,15 @@ async function submitSignup(evt: Event) {
 <template lang="pug">
 LoginForm
 	.login-container
-		h1.login-title Sign Up
-		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')
-		BInput#password(placeholder='Password' name='password' v-model='formValue.password')
-		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword')
+		h1.login-title Sign up
+		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username' :show-success="true")
+		BInput#password(placeholder='Password' name='password' v-model='formValue.password' :show-success="true")
+		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword' :show-success="true")
 		.field
 			BButton(:type="BloomaTypes.Primary" @click="submitSignup").login-btn Sign Up
 		.login-button-container
-			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/login")') Login
-			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/deno")') Demo
+			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/login")') Log in
+			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/demo")') Demo
 </template>
 
 <style lang="scss" scoped>
