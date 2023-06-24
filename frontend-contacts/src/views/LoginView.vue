@@ -45,8 +45,9 @@ const { errors, validate, submitForm } = useForm<LoginRequest>({
 
 const {
 	data: loginRes,
-	isFinished: loginFinished,
 	execute: loginSendRequest,
+	isLoading: isLoading,
+	isFinished: isFinished,
 } = useAxios<BaseReponse<User>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
 
 async function submitLogin(evt: Event) {
@@ -92,13 +93,13 @@ async function submitLogin(evt: Event) {
 </script>
 
 <template lang="pug">
-LoginForm
+LoginForm(:loading="isLoading")
 	.login-container
 		h1.login-title Log in
 		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')
 		BInput#password(placeholder='Password' name='password' v-model='formValue.password')
 		.field
-			BButton(:type="BloomaTypes.Primary" @click="submitLogin").login-btn Log in
+			BButton(:type="BloomaTypes.Primary" @click="submitLogin" :action="true").login-btn Log in
 		.login-button-container
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/signup")') Sign Up
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/demo")') Demo

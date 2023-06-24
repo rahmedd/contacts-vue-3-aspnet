@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, inject } from 'vue';
 import { useField } from 'vee-validate';
 import { useDebounceFn } from '@vueuse/core'
 import { Icon } from '@iconify/vue';
+import { FormLoadingKey } from '@/blooma/symbols';
+import { BloomaTypes } from './enums/BloomaTypes';
 
 const props = defineProps({
 	modelValue: String,
@@ -24,6 +26,8 @@ const props = defineProps({
 
 const emits = defineEmits(['update:modelValue'])
 
+const formLoading = inject(FormLoadingKey)
+
 const { value, errorMessage, errors, meta, handleBlur, handleChange, setTouched, validate } = useField(() => props.name,
 	undefined, // validator is provided by form
 	{
@@ -35,24 +39,24 @@ const inputClasses = computed(() => {
 	const validated = meta.validated && !meta.pending
 
 	return {
-		'input': true,
-		'validated': validated,
-		'is-danger': validated && !meta.valid,
-		'is-success': validated && meta.valid && props.showSuccess,
+		input: true,
+		validated: validated,
+		[BloomaTypes.Danger]: validated && !meta.valid,
+		[BloomaTypes.Success]: validated && meta.valid && props.showSuccess,
 	}
 })
 
 const inputClassesDebounced = ref({
-	'input': true,
-	'validated': false,
-	'is-danger': false,
-	'is-success': false,
+	input: true,
+	validated: false,
+	[BloomaTypes.Danger]: false,
+	[BloomaTypes.Success]: false,
 })
 
 const debounceinputClasses = useDebounceFn(() => {
-	inputClassesDebounced.value['validated'] = inputClasses.value['validated']
-	inputClassesDebounced.value['is-danger'] = inputClasses.value['is-danger']
-	inputClassesDebounced.value['is-success'] = inputClasses.value['is-success']
+	inputClassesDebounced.value.validated = inputClasses.value.validated
+	inputClassesDebounced.value[BloomaTypes.Danger] = inputClasses.value[BloomaTypes.Danger]
+	inputClassesDebounced.value[BloomaTypes.Success] = inputClasses.value[BloomaTypes.Success]
 }, 50)
 
 watch(inputClasses, async () => {
@@ -97,14 +101,15 @@ div.field
 			:placeholder="placeholder"
 			@blur="validateOnBlur"
 			@input="validateOnChange"
+			:disabled="formLoading"
 		)
 		span(v-if="icon").icon.is-small.is-left
 			icon(:icon="icon")
 		span.icon.is-small.is-right
 			template(v-if="meta.touched")
 				icon(v-if="loading" icon="eos-icons:loading" class="field-icon-error" width="22")
-				icon(v-else-if="inputClassesDebounced['is-danger']" icon="icon-park-solid:attention" class="field-icon-error" width="22")
-				icon(v-else-if="inputClassesDebounced['is-success']" icon='icon-park-solid:check-one' class="field-icon-success" width="22")
+				icon(v-else-if="inputClassesDebounced[BloomaTypes.Danger]" icon="icon-park-solid:attention" class="field-icon-error" width="22")
+				icon(v-else-if="inputClassesDebounced[BloomaTypes.Success]" icon='icon-park-solid:check-one' class="field-icon-success" width="22")
 	Transition
 		div(v-if="errorMessage").help.is-danger {{ errorMessage }}
 </template>

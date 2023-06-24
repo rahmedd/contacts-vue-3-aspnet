@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import BForm from '@/blooma/BForm.vue';
+
+const props = defineProps({
+	loading: {
+		type: Boolean,
+		default: false
+	},
+})
 
 </script>
 
@@ -6,7 +14,8 @@
 .hero.is-fullheight
 	.hero-body
 		.container
-			slot
+			BForm(:loading="loading")
+				slot
 </template>
 
 <style lang="scss" scoped>

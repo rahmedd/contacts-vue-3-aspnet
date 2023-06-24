@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, type PropType } from 'vue';
+import { computed, inject, type PropType } from 'vue';
+import { FormLoadingKey } from '@/blooma/symbols';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
-import { boolean } from 'zod';
 
 const props = defineProps({
 	disabled: {
@@ -16,24 +16,40 @@ const props = defineProps({
 	light: {
 		type: Boolean,
 		default: false
+	},
+	action: {
+		type: Boolean,
+		default: false
+	},
+})
+
+const formLoading = inject(FormLoadingKey)
+
+const classObject = computed(() => {
+	return {
+		button: true,
+		[props.type]: props.type,
+		[BloomaTypes.Light]: props.light,
+		['is-loading']: formLoading?.value && props.action,
 	}
 })
 
-const classObject = computed(() => {
-	const classes = ['button']
-	classes.push(props.type)
-
-	if (props.light) {
-		classes.push('is-light')
+const computedDisabled = computed(() => {
+	if (props.disabled) {
+		return true
 	}
 
-	return classes
+	if (formLoading?.value) {
+		return true
+	}
+
+	return false
 })
 
 </script>
 
 <template lang="pug">
-button(:class="classObject" type="button" :disabled="disabled")
+button(type="button" :class="classObject" :disabled="computedDisabled")
 	slot
 </template>
 
