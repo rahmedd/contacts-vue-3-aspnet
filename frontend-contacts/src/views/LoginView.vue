@@ -55,11 +55,11 @@ async function submitLogin(evt: Event) {
 
 	try {
 		const validationRes = await validate()
+		await submitForm()
+
 		if (!validationRes.valid) {
 			return
 		}
-
-		await submitForm()
 	}
 	catch (errors) {
 		console.log('Error: submitLogin validation failed')
