@@ -3,11 +3,10 @@ import { ref, unref } from 'vue';
 import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
 import {
-	object as zobject,
-	string as zstring
-} from 'zod';
+	object as yobject,
+	string as ystring,
+} from 'yup';
 
 import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
@@ -24,15 +23,10 @@ import LoginForm from '@/components/LoginForm.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const formSchema = toTypedSchema(zobject({
-	username: zstring()
-		.nonempty({ message: 'Required' })
-	,
-	password: zstring()
-		.nonempty({ message: 'Required' })
-		// .min(12, { message: 'Passsword must be at least 12 characters long' })
-	,
-}))
+const formSchema = yobject({
+	username: ystring().required('Required'),
+	password: ystring().required('Required'),
+});
 
 const formValue = ref<LoginRequest>({
 	username: '',

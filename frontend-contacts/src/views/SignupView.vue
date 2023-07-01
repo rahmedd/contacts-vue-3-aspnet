@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, unref } from 'vue';
 import { RouterLink } from 'vue-router'
+import { useDebounceFn } from '@vueuse/core'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
 import {
-	object as zobject,
-	string as zstring
-} from 'zod';
+	object as yobject,
+	string as ystring,
+	ref as yref,
+} from 'yup';
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type LoginResponse from '@/responseTypes/LoginResponse';
 import type SignupRequest from '@/requestTypes/SignupRequest';
@@ -18,20 +19,30 @@ import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
 
-const formSchema = toTypedSchema(
-	zobject({
-		username: zstring()
-			.min(4, { message: 'Username must be at least 4 characters long' })
-		,
-		password: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-		,
-		confirmPassword: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-			.refine(s => s === formValue.value.password, { message: 'Passwords do not match' })
-		,
-	})
-)
+const formSchema = 	yobject({
+	username: ystring()
+		.min(4, 'Username must be at least 4 characters')
+		.test('checkEmailUnique', 'This username is unavailable', value =>
+			debouncedRequest({
+				data: {
+					username: value
+				}
+			})
+			.then(async res => {
+				const resolvedRes = await res
+				const success = resolvedRes?.data?.value?.success
+				return !!success
+			})
+			// .catch(ex => console.log('res'))
+		)
+	,
+	password: ystring()
+		.min(8, 'Passsword must be at least 8 characters')
+	,
+	confirmPassword: ystring()
+		.min(8, 'Passsword must be at least 8 characters')
+		.oneOf([yref('password')], 'Passwords do not match')
+})
 
 const formValue = ref<SignupRequest>({
 	username: '',
@@ -54,6 +65,8 @@ const {
 	isFinished: checkUsernameFinished,
 	execute: checkUsernameRequest,
 } = useAxios<BaseReponse<UsernameRequest>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false })
+
+const debouncedRequest = useDebounceFn(checkUsernameRequest, 300)
 
 async function submitSignup(evt: Event) {
 	evt.preventDefault()
