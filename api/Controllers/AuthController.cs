@@ -33,7 +33,18 @@ public class AuthController : ControllerBase
 		return Ok(res);
 	}
 
-	[HttpPost("Signup")]
+    [HttpPost("CheckUsername")]
+    public async Task<ActionResult<BaseResponseEmpty>> PostUsername([FromBody] CheckUsernameDto checkUsernameDto)
+    {
+        User user = await _context.Users.FirstOrDefaultAsync(m => m.Username == checkUsernameDto.Username);
+		if (user == null)
+		{
+            return Ok(new BaseResponseEmpty { Success = true, Message = "Username available" });
+        }
+        return Ok(new BaseResponseEmpty { Success = false, Message = "Username taken" });
+    }
+
+    [HttpPost("Signup")]
 	public async Task<ActionResult<BaseResponse<UserDto>>> PostSignup([FromBody] LoginDto signup)
 	{
 		var user = new User()
