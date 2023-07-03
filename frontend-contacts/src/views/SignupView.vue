@@ -17,11 +17,13 @@ import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
+import { useDebounceFn } from '@vueuse/core';
 
 const formSchema = toTypedSchema(
 	zobject({
 		username: zstring()
 			.min(4, { message: 'Username must be at least 4 characters long' })
+			.refine(checkUsernameCached, "Username not available")
 		,
 		password: zstring()
 			.min(8, { message: 'Passsword must be at least 8 characters long' })
@@ -39,7 +41,9 @@ const formValue = ref<SignupRequest>({
 	confirmPassword: ''
 })
 
-const { errors, validate, submitForm } = useForm<SignupRequest>({
+const prevUsername = ref('dummyuser')
+
+const { errors, meta, validate, submitForm, setFieldTouched } = useForm<SignupRequest>({
 	validationSchema: formSchema
 })
 
@@ -51,9 +55,9 @@ const {
 
 const {
 	data: checkUsernameRes,
-	isFinished: checkUsernameFinished,
-	execute: checkUsernameRequest,
-} = useAxios<BaseReponse<UsernameRequest>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false })
+	execute: checkUsernameSendRequest,
+	isLoading: checkUsernameLoading,
+} = useAxios<BaseReponse<undefined>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false })
 
 async function submitSignup(evt: Event) {
 	evt.preventDefault()
@@ -90,6 +94,37 @@ async function submitSignup(evt: Event) {
 		console.log(ex)
 	}
 }
+
+const debouncedRequest = useDebounceFn(checkUsernameSendRequest, 500)
+
+async function checkUsername(username: string) {
+	setFieldTouched('username', true) // manually insert async
+
+	try {
+		const { data } = await debouncedRequest({
+			data: {
+				Username: username,
+			},
+		})
+
+		const res = unref(data)!
+
+		return res.success
+	}
+	catch (ex) {
+		// console.log('Error: checkUsername request failed')
+		// console.log(ex)
+	}
+}
+
+function checkUsernameCached(username: string) {
+	if (prevUsername.value === username) {
+		return !!checkUsernameRes?.value?.success
+	}
+	prevUsername.value = username
+	return checkUsername(username)
+}
+
 </script>
 
 <template lang="pug">
