@@ -14,6 +14,7 @@ import type LoginResponse from '@/responseTypes/LoginResponse';
 import type SignupRequest from '@/requestTypes/SignupRequest';
 import type UsernameRequest from '@/requestTypes/UsernameRequest';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
+import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes';
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
@@ -98,7 +99,7 @@ async function submitSignup(evt: Event) {
 const debouncedRequest = useDebounceFn(checkUsernameSendRequest, 500)
 
 async function checkUsername(username: string) {
-	setFieldTouched('username', true) // manually insert async
+	// setFieldTouched('username', true) // manually insert async
 
 	try {
 		const { data } = await debouncedRequest({
@@ -131,9 +132,9 @@ function checkUsernameCached(username: string) {
 LoginForm
 	.login-container
 		h1.login-title Sign up
-		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username' :show-success="true")
-		BInput#password(placeholder='Password' name='password' v-model='formValue.password' :show-success="true")
-		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword' :show-success="true")
+		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")
+		BInput#password(placeholder='Password' name='password' v-model='formValue.password' :show-success="true" :debounce="250")
+		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword' :show-success="true" :debounce="250")
 		.field
 			BButton(:type="BloomaTypes.Primary" @click="submitSignup").login-btn Sign Up
 		.login-button-container
