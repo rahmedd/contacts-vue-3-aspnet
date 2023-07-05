@@ -37,10 +37,13 @@ const emits = defineEmits(['update:modelValue'])
 
 const formLoading = inject(FormLoadingKey)
 
+const inputValue = ref<string>(props.modelValue || '')
+
 const { value, errorMessage, meta, handleBlur, handleChange, setTouched, validate } = useField(
 	toRef(props, 'name'),
 	undefined, // validator is provided by form
 	{
+		initialValue: props.modelValue,
 		validateOnValueUpdate: false,
 		syncVModel: false, // handle emits manually for debounced input
 	}
@@ -89,7 +92,9 @@ async function validateOnInput(evt: Event) {
 }
 
 async function handleValidationMode(evt: Event) {
-	emits('update:modelValue', (evt.target as HTMLInputElement).value) // update model value
+	const val = (evt.target as HTMLInputElement).value
+	value.value = val // update vee-validate internal state
+	emits('update:modelValue', val) // update model value
 
 	const mode: BloomaValidationModes = props.mode
 
@@ -147,7 +152,7 @@ div.field
 	label.label {{ placeholder }}
 	div.control(:class="controlClasses")
 		input(
-			v-model="value"
+			v-model="inputValue"
 			type="text"
 			:class="inputClassesDebounced"
 			:placeholder="placeholder"

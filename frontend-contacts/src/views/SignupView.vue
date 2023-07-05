@@ -58,7 +58,7 @@ const {
 	data: checkUsernameRes,
 	execute: checkUsernameSendRequest,
 	isLoading: checkUsernameLoading,
-} = useAxios<BaseReponse<undefined>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false })
+} = useAxios<BaseReponse<undefined>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false, resetOnExecute: false })
 
 async function submitSignup(evt: Event) {
 	evt.preventDefault()
@@ -96,34 +96,28 @@ async function submitSignup(evt: Event) {
 	}
 }
 
-const debouncedRequest = useDebounceFn(checkUsernameSendRequest, 500)
+const debouncedRequest = checkUsernameSendRequest
 
-async function checkUsername(username: string) {
-	// setFieldTouched('username', true) // manually insert async
+async function checkUsernameCached(username: string) {
+	// if (prevUsername.value === username) {
+	// 	return !!checkUsernameRes?.value?.success
+	// }
+
+	// prevUsername.value = username
 
 	try {
-		const { data } = await debouncedRequest({
+		const res = await debouncedRequest({
 			data: {
 				Username: username,
 			},
 		})
 
-		const res = unref(data)!
-
-		return res.success
+		return res.data.value?.success
 	}
 	catch (ex) {
-		// console.log('Error: checkUsername request failed')
-		// console.log(ex)
-	}
-}
 
-function checkUsernameCached(username: string) {
-	if (prevUsername.value === username) {
-		return !!checkUsernameRes?.value?.success
+		return checkUsernameRes.value?.success
 	}
-	prevUsername.value = username
-	return checkUsername(username)
 }
 
 </script>
