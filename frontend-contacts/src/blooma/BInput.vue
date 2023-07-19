@@ -23,6 +23,10 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	showLabel: {
+		type: Boolean,
+		default: true,
+	},
 	mode: {
 		type: String as PropType<BloomaValidationModes>,
 		default: BloomaValidationModes.Eager
@@ -149,7 +153,7 @@ const controlClasses = computed(() => ({
 
 <template lang="pug">
 div.field
-	label.label {{ placeholder }}
+	label.label(v-show="showLabel") {{ placeholder }}
 	div.control(:class="controlClasses")
 		input(
 			v-model="inputValue"

@@ -18,7 +18,6 @@ import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes';
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
-import { useDebounceFn } from '@vueuse/core';
 
 const formSchema = toTypedSchema(
 	zobject({
@@ -126,7 +125,7 @@ async function checkUsernameCached(username: string) {
 LoginForm
 	.login-container
 		h1.login-title Sign up
-		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")
+		BInput#username.login-input(placeholder='Username' name='username' v-model='formValue.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")
 		BInput#password(placeholder='Password' name='password' v-model='formValue.password' :show-success="true" :debounce="250")
 		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword' :show-success="true" :debounce="250")
 		.field

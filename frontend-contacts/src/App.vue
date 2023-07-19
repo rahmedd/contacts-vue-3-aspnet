@@ -7,6 +7,20 @@ import { RouterLink, RouterView } from 'vue-router'
 	<RouterView />
 </template>
 
-<style>
+<style lang="scss">
+@import '@/blooma/vars.scss';
 /* * { outline: 1px solid red; } */
+*::-webkit-scrollbar {
+  width: 6px;               /* width of the entire scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: $bl-primary-light;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: gainsboro;    /* color of the scroll thumb */
+  border-radius: 4px;       /* roundness of the scroll thumb */
+  border: none;
+}
 </style>
