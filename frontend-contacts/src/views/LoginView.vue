@@ -39,7 +39,7 @@ const formValue = ref<LoginRequest>({
 	password: ''
 })
 
-const { errors, validate, submitForm } = useForm<LoginRequest>({
+const { errors, validate, submitForm, setFieldError } = useForm<LoginRequest>({
 	validationSchema: formSchema
 })
 
@@ -78,7 +78,7 @@ async function submitLogin(evt: Event) {
 
 		if (!res.success || !res.body) {
 			authStore.login(false, res.body)
-
+			setFieldError('password', 'Incorrect username or password')
 			return
 		}
 		authStore.login(true, res.body)
