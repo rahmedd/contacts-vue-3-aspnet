@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, unref } from 'vue';
-import { RouterLink } from 'vue-router'
+import { ref, unref } from 'vue';
+import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
+import { useAuthStore } from '@/stores/auth'
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import {
@@ -18,6 +19,9 @@ import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes';
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const formSchema = toTypedSchema(
 	zobject({
@@ -43,7 +47,7 @@ const formValue = ref<SignupRequest>({
 
 const prevUsername = ref('dummyuser')
 
-const { errors, meta, validate, submitForm, setFieldTouched } = useForm<SignupRequest>({
+const { errors, meta, validate, submitForm, setFieldError } = useForm<SignupRequest>({
 	validationSchema: formSchema
 })
 
@@ -51,6 +55,7 @@ const {
 	data: loginRes,
 	isFinished: loginFinished,
 	execute: loginSendRequest,
+	isLoading: isLoading,
 } = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
 
 const {
@@ -86,7 +91,9 @@ async function submitSignup(evt: Event) {
 		const res = unref(data)!
 
 		if (!res.success) {
-			
+			authStore.login(false, res.body)
+			setFieldError('password', 'Error creating account')
+			return
 		}
 	}
 	catch (ex) {
@@ -122,7 +129,7 @@ async function checkUsernameCached(username: string) {
 </script>
 
 <template lang="pug">
-LoginForm
+LoginForm(:loading="isLoading" @keyup.enter="submitSignup")
 	.login-container
 		h1.login-title Sign up
 		BInput#username.login-input(placeholder='Username' name='username' v-model='formValue.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")

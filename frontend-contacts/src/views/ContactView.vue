@@ -1,34 +1,59 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { Contact } from '@/requestTypes/Contact'
 import { ContactResponse } from '@/responseTypes/ContactResponse';
+import { useAxios } from '@vueuse/integrations/useAxios'
+import type User from '@/responseTypes/User';
+import { EditContactModes } from '@/enums/EditContactModes';
+import apiClient from '@/services/axios';
 import BButton from '@/blooma/BButton.vue'
 import BInput from '@/blooma/BInput.vue'
 import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
+import type BaseReponse from '@/responseTypes/BaseResponse';
 
 const authStore = useAuthStore()
-const contacts = ref<ContactResponse[]>([])
+
+const {
+	data: contacts,
+	isLoading: isLoading,
+	isFinished: isFinished,
+} = useAxios<BaseReponse<ContactResponse[]>>('Contact', { method: 'GET' }, apiClient, { immediate: true })
+
+const {
+	data: contact,
+	isLoading: contactIsLoading,
+	isFinished: contactisFinished,
+	execute: getContact,
+} = useAxios<BaseReponse<ContactResponse>>(`Contact/0`, { method: 'GET' }, apiClient, { immediate: false })
+
+// const contacts = ref<ContactResponse[]>([])
 const selected = ref<number>(0) // id
-for (let i = 0; i < 20; i++) {
-	contacts.value.push(
-		new ContactResponse(Math.floor(Math.random() * 9999999), 'lorem', 'ipsum', [
-			{
-				fieldName: 'Birthday',
-				fieldValue: '2000-04-21',
-				fieldType: "DATE",
-			}
-		])
-	)
+const viewMode = ref<EditContactModes>()
+
+async function selectContact(id: number) {
+	if (viewMode.value === EditContactModes.EDIT) {
+		// Open dialog
+		return
+	}
+
+	selected.value = id
+
+	try {
+		await getContact(`Contact/${id}`)
+	}
+	catch (ex) {
+		// TODO: toast error
+		console.log(ex)
+	}
 }
 
-function selectContact(id: number) {
-	console.log(id)
-	selected.value = id
+function updateMode(mode: EditContactModes) {
+	viewMode.value = mode
 }
 
 </script>
@@ -45,9 +70,10 @@ div.contact-container
 		div.alphabet-container.scrollable
 			Alphabet
 		div.contact-select-container.scrollable
-			SelectContact(:contacts="contacts" :selected="selected" @update="selectContact")
+			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" @update="selectContact")
 		div.contact-view-container.scrollable
-			EditContact(:contact="contacts[selected]")
+			EditContact(v-if="contact" :key="contact.body.id" :contact="contact.body" @mode="updateMode")
+			p(v-else) Select a contact
 </template>
 
 <style lang="scss" scoped>

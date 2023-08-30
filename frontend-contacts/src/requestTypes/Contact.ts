@@ -1,13 +1,13 @@
 import type { ContactCustomField } from '@/requestTypes/ContactCustomField';
 
 export class Contact {
-	public firstName: string
-	public lastName: string
+	public firstname: string
+	public lastname: string
 	public customFields: ContactCustomField[]
 	
-	constructor(firstName: string, lastName: string, customFields: ContactCustomField[]) {
-		this.firstName = firstName
-		this.lastName = lastName
+	constructor(firstname: string, lastname: string, customFields: ContactCustomField[]) {
+		this.firstname = firstname
+		this.lastname = lastname
 		this.customFields = customFields
 	}
 }

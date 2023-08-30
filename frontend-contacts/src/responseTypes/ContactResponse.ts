@@ -4,8 +4,8 @@ import type { ContactCustomField } from "@/requestTypes/ContactCustomField";
 export class ContactResponse extends Contact {
 	id: number
 
-	constructor(id: number, firstName: string, lastName: string, customFields: ContactCustomField[]) {
-		super(firstName, lastName, customFields)
+	constructor(id: number, firstname: string, lastname: string, customFields: ContactCustomField[]) {
+		super(firstname, lastname, customFields)
 		this.id = id
 	}
 }

@@ -11,10 +11,11 @@ const props = defineProps({
 
 const comp = computed(() => props.loading)
 provide(FormLoadingKey, comp) // reactive
+
 </script>
 
 <template lang="pug">
-div.b-form
+form.b-form
 	slot
 </template>
 

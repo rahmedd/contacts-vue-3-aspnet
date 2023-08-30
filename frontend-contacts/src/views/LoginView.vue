@@ -93,7 +93,7 @@ async function submitLogin(evt: Event) {
 </script>
 
 <template lang="pug">
-LoginForm(:loading="isLoading")
+LoginForm(:loading="isLoading" @keyup.enter="submitLogin")
 	.login-container
 		h1.login-title Log in
 		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')

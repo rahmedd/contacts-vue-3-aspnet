@@ -34,7 +34,7 @@ div
 			:type="BloomaTypes.Primary"
 			:light="contact.id !== selected"
 			@click="() => selectContact(contact.id)"
-		)  {{ contact.firstName }} {{ contact.lastName }}
+		)  {{ contact.firstname }} {{ contact.lastname }}
 </template>
 
 <style lang="scss" scoped>
