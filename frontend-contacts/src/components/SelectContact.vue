@@ -34,7 +34,8 @@ div
 			:type="BloomaTypes.Primary"
 			:light="contact.id !== selected"
 			@click="() => selectContact(contact.id)"
-		)  {{ contact.firstname }} {{ contact.lastname }}
+		)
+			span {{ contact.firstname }} {{ contact.lastname }}
 </template>
 
 <style lang="scss" scoped>
@@ -47,6 +48,10 @@ div
 	font-weight: 600;
 	border-radius: 0;
 	text-align: left;
+
+	span {
+		width: 100%;
+	}
 }
 
 </style>

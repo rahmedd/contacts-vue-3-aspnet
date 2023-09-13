@@ -73,7 +73,8 @@ div.contact-container
 			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" @update="selectContact")
 		div.contact-view-container.scrollable
 			EditContact(v-if="contact" :key="contact.body.id" :contact="contact.body" @mode="updateMode")
-			p(v-else) Select a contact
+			h1(v-else)
+			//- h1(v-else) Select a contact
 </template>
 
 <style lang="scss" scoped>
@@ -87,7 +88,7 @@ div.contact-container
 
 .contact-layout {
 	display: grid;
-	grid-template-columns: 100px 250px 500px;
+	grid-template-columns: 100px 280px 500px;
 	grid-template-rows: 60px 1fr;
 	gap: 0px 0px;
 	// grid-auto-flow: row;
@@ -136,6 +137,12 @@ div.contact-container
 
 .scrollable {
 	overflow-y: scroll;
+}
+
+.contact-view-container > h1 {
+	font-size: 24px;
+	font-weight: bold;
+	margin-left: 16px;
 }
 
 </style>
