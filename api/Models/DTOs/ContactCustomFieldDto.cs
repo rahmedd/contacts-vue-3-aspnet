@@ -1,4 +1,6 @@
-﻿namespace api.Models.DTOs;
+﻿using api.Models.Enums;
+
+namespace api.Models.DTOs;
 
 public class ContactCustomFieldDto
 {
@@ -8,5 +10,5 @@ public class ContactCustomFieldDto
 
     public string FieldValue { get; set; }
 
-    public string FieldType { get; set; }
+    public ContactCustomFieldTypes FieldType { get; set; }
 }

@@ -1,4 +1,6 @@
-﻿namespace api.Models;
+﻿using api.Models.Enums;
+
+namespace api.Models;
 
 public class ContactCustomField
 {
@@ -8,7 +10,7 @@ public class ContactCustomField
 
 	public string FieldValue { get; set; }
 
-	public string FieldType { get; set; }
+	public ContactCustomFieldTypes FieldType { get; set; }
 
 	public int ContactId { get; set; }
 
