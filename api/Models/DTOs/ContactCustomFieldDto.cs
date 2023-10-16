@@ -4,7 +4,7 @@ namespace api.Models.DTOs;
 
 public class ContactCustomFieldDto
 {
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
     public string FieldName { get; set; }
 

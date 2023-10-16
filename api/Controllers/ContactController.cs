@@ -45,7 +45,7 @@ public class ContactController : ControllerBase
 	{
         //return await _context.Contacts.FirstAsync();
         User user = await _userService.GetUserByUsernameAsync(LoggedInUser);
-		ContactDto contactDto = await _contactService.GetContactAsync(user, id);
+		ContactDto contactDto = await _contactService.GetContactDtoAsync(user, id);
 
         var res = new BaseResponse<ContactDto>() { Body = contactDto };
 
@@ -76,14 +76,35 @@ public class ContactController : ControllerBase
 	}
 
     // PUT api/<ContactsController>/5
-    [Authorize]
-    [HttpPut("{id}")]
-	public void Put(int id, [FromBody] string value)
+ //   [Authorize]
+ //   [HttpPut("{id}")]
+	//public void Put(int id, [FromBody] string value)
+	//{
+	//}
+
+	[Authorize]
+	[HttpPut]
+	public async Task<ActionResult<BaseResponse<ContactDto>>> Put([FromBody] ContactRequestDto contactReq)
 	{
+		User user = await _userService.GetUserByUsernameAsync(LoggedInUser);
+		ContactDto contactDto = await _contactService.UpdateContactAsync(user, contactReq);
+		//ContactDto contactDto = await _contactService.GetContactDtoAsync(user, id);
+
+		var res = new BaseResponse<ContactDto>() { Body = contactDto };
+
+		if (contactDto == null)
+		{
+			res.Success = false;
+			return NotFound(res);
+		}
+
+		return res;
+
 	}
 
-    // DELETE api/<ContactsController>/5
-    [Authorize]
+
+	// DELETE api/<ContactsController>/5
+	[Authorize]
     [HttpDelete("{id}")]
 	public void Delete(int id)
 	{

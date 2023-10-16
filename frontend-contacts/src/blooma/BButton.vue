@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, type PropType } from 'vue';
+import { computed, inject, ref, type PropType } from 'vue';
 import { FormLoadingKey } from '@/blooma/symbols';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 
@@ -23,7 +23,8 @@ const props = defineProps({
 	},
 })
 
-const formLoading = inject(FormLoadingKey)
+// TODO: disabled form loading
+const formLoading = ref(false) // inject(FormLoadingKey)
 
 const classObject = computed(() => {
 	return {

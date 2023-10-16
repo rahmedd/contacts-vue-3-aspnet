@@ -1,6 +1,7 @@
 import type { ContactCustomFieldTypes } from "@/enums/ContactCustomFieldTypes"
 
 export class ContactCustomField {
+	internalId: string
 	fieldName: string
 	fieldValue: string
 	fieldType: ContactCustomFieldTypes
@@ -9,5 +10,6 @@ export class ContactCustomField {
 		this.fieldName = fieldName
 		this.fieldType = fieldType
 		this.fieldValue = fieldValue
+		this.internalId = self.crypto.randomUUID()
 	}
 }

@@ -20,5 +20,5 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; } = null!;
 	public DbSet<Contact> Contacts { get; set; } = null!;
-    //public DbSet<UserContact> UserContact { get; set; } = null!;
+	public DbSet<ContactCustomField> ContactCustomFields { get; set; } = null!;
 }

@@ -15,6 +15,7 @@ import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
 import type BaseReponse from '@/responseTypes/BaseResponse';
+import { useGetContact } from '@/composables/ContactMethods';
 
 const authStore = useAuthStore()
 
@@ -24,12 +25,18 @@ const {
 	isFinished: isFinished,
 } = useAxios<BaseReponse<ContactResponse[]>>('Contact', { method: 'GET' }, apiClient, { immediate: true })
 
+// const {
+// 	data: contact,
+// 	isLoading: contactIsLoading,
+// 	isFinished: contactisFinished,
+// 	execute: getContact,
+// } = useAxios<BaseReponse<ContactResponse>>(`Contact/0`, { method: 'GET' }, apiClient, { immediate: false })
+
 const {
 	data: contact,
-	isLoading: contactIsLoading,
-	isFinished: contactisFinished,
-	execute: getContact,
-} = useAxios<BaseReponse<ContactResponse>>(`Contact/0`, { method: 'GET' }, apiClient, { immediate: false })
+	state: contactState,
+	update: getContact,
+} = useGetContact()
 
 // const contacts = ref<ContactResponse[]>([])
 const selected = ref<number>(0) // id
@@ -44,7 +51,8 @@ async function selectContact(id: number) {
 	selected.value = id
 
 	try {
-		await getContact(`Contact/${id}`)
+		// await getContact(`Contact/${id}`)
+		await getContact(id)
 	}
 	catch (ex) {
 		// TODO: toast error
@@ -72,7 +80,7 @@ div.contact-container
 		div.contact-select-container.scrollable
 			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" @update="selectContact")
 		div.contact-view-container.scrollable
-			EditContact(v-if="contact" :key="contact.body.id" :contact="contact.body" @mode="updateMode")
+			EditContact(v-if="contact" :key="contact.id" :contact="contact" @mode="updateMode")
 			h1(v-else)
 			//- h1(v-else) Select a contact
 </template>

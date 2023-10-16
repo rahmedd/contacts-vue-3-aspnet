@@ -6,6 +6,7 @@ import { Icon } from '@iconify/vue';
 import { FormLoadingKey } from '@/blooma/symbols';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes';
+import { BloomaSizes } from './enums/BloomaSizes';
 
 const props = defineProps({
 	modelValue: String,
@@ -29,12 +30,16 @@ const props = defineProps({
 	},
 	mode: {
 		type: String as PropType<BloomaValidationModes>,
-		default: BloomaValidationModes.Eager
+		default: BloomaValidationModes.Eager,
 	},
 	debounce: {
 		type: Number,
 		default: 0,
-	}
+	},
+	size: {
+		type: String as PropType<BloomaSizes>,
+		default: BloomaSizes.Default,
+	},
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -59,6 +64,7 @@ const inputClasses = computed(() => {
 	return {
 		input: true,
 		validated: validated,
+		[props.size]: !!props.size,
 		[BloomaTypes.Danger]: validated && !meta.valid,
 		[BloomaTypes.Success]: validated && meta.valid && props.showSuccess,
 	}
@@ -67,12 +73,14 @@ const inputClasses = computed(() => {
 const inputClassesDebounced = ref({
 	input: true,
 	validated: false,
+	[props.size]: true,
 	[BloomaTypes.Danger]: false,
 	[BloomaTypes.Success]: false,
 })
 
 const debounceinputClasses = useDebounceFn(() => {
 	inputClassesDebounced.value.validated = inputClasses.value.validated
+	inputClassesDebounced.value[props.size] = inputClasses.value[props.size]
 	inputClassesDebounced.value[BloomaTypes.Danger] = inputClasses.value[BloomaTypes.Danger]
 	inputClassesDebounced.value[BloomaTypes.Success] = inputClasses.value[BloomaTypes.Success]
 }, 50)
