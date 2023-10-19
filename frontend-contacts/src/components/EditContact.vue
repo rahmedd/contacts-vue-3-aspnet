@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, type PropType, onMounted, computed, toValue } from 'vue';
-import { useForm } from 'vee-validate';
+import { useForm, useFieldArray } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import {
 	object as zobject,
@@ -79,9 +79,12 @@ const formValue = ref<Contact>(
 	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
 )
 
-const { errors, validate, submitForm, setFieldError } = useForm<ContactResponse>({
+const { errors, validate, submitForm, setFieldError, values } = useForm<ContactResponse>({
+	initialValues: new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } })),
 	validationSchema: formSchema
 })
+
+const { remove, push, fields } = useFieldArray('customFields');
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -109,6 +112,11 @@ function toggleDeleteModal() {
 	deleteModal.value = !deleteModal.value
 }
 
+async function DEV_VALIDATE() {
+	const res = await validate()
+	console.log(res)
+}
+
 function log(str: string) {
 	console.log(str)
 }
@@ -131,16 +139,30 @@ div.edit-contact-container
 				BInput(:placeholder="field.fieldName" :name="field.internalId + `fieldvalue`" v-model="field.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false")
 			div.field-stack
 				p hello
-		//- div.row-split(v-for="(field, idx) in formValue.customFields" :key="field.internalId")
-		//- 	BInput(
-		//- 		:placeholder="field.fieldName"
-		//- 		:name="`fieldName`"
-		//- 		v-model="field.fieldName"
-		//- 		:mode="BloomaValidationModes.Aggressive"
-		//- 		:debounce="250"
-		//- 		:showLabel="false"
-		//- 		:size="BloomaSizes.Small"
-		//- 	)
+
+		//- div.row-split(v-for="field in formValue.customFields" :key="field.internalId")
+		//- 	div.field-stack
+		//- 		BInput(
+		//- 			:placeholder="`fieldName`"
+		//- 			:name="`fieldName`"
+		//- 			v-model="field.fieldValue"
+		//- 			:mode="BloomaValidationModes.Aggressive"
+		//- 			:debounce="250"
+		//- 			:showLabel="false"
+		//- 			:size="BloomaSizes.Small"
+		//- 		)
+
+		div.row-split(v-for="(field, idx) in fields" :key="field.key")
+			div.field-stack
+				BInput(
+					:placeholder="`fieldName`"
+					:name="`fieldName`"
+					v-model="formValue.customFields[idx].fieldName"
+					:mode="BloomaValidationModes.Aggressive"
+					:debounce="250"
+					:showLabel="false"
+					:size="BloomaSizes.Small"
+				)
 
 		div.row-split
 			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
@@ -149,6 +171,7 @@ div.edit-contact-container
 
 	div.button-bar
 		BButton(:type="BloomaTypes.Primary" @click="saveContact" :disabled="mode === EditContactModes.VIEW") Save
+		BButton(:type="BloomaTypes.Primary" @click="DEV_VALIDATE") Save
 		BButton(:type="BloomaTypes.Danger" @click="toggleDeleteModal")
 			span.icon
 				Icon(icon="mdi:trash" height="22")

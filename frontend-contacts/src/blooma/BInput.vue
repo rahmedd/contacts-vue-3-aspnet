@@ -49,7 +49,7 @@ const formLoading = inject(FormLoadingKey)
 const inputValue = ref<string>(props.modelValue || '')
 
 const { value, errorMessage, meta, handleBlur, handleChange, setTouched, validate } = useField(
-	toRef(props, 'name'),
+	() => props.name,
 	undefined, // validator is provided by form
 	{
 		initialValue: props.modelValue,
