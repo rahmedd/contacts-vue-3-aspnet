@@ -1,47 +1,39 @@
 <script setup lang="ts">
-import { ref, unref } from 'vue';
+import { reactive, ref, unref } from 'vue';
 import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring
-} from 'zod';
-
 import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
+import { useVuelidate } from '@vuelidate/core'
+import { required, email } from '@vuelidate/validators'
+// import { useBForm } from '@/blooma/composables/useBForm';
 
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type User from '@/responseTypes/User';
-import LoginRequest from '@/requestTypes/LoginRequest';
+import type LoginRequest from '@/requestTypes/LoginRequest';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
+
 
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
 
+
 const router = useRouter()
 const authStore = useAuthStore()
 
-const formSchema = toTypedSchema(zobject({
-	username: zstring()
-		.nonempty({ message: 'Required' })
-	,
-	password: zstring()
-		.nonempty({ message: 'Required' })
-		// .min(12, { message: 'Passsword must be at least 12 characters long' })
-	,
-}))
-
-const formValue = ref<LoginRequest>({
+const form = reactive<LoginRequest>({
 	username: '',
-	password: ''
+	password: '',
 })
 
-const { errors, validate, submitForm, setFieldError } = useForm<LoginRequest>({
-	validationSchema: formSchema
-})
+const rules = {
+	username: { required, email },
+	password: { required },
+}
+
+const v$ = useVuelidate(rules, form)
+
 
 const {
 	data: loginRes,
@@ -54,10 +46,14 @@ async function submitLogin(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		const validationRes = await validate()
-		await submitForm()
+		const vres = await v$.value.$validate()
+		const field = v$.value.username
+		type abc = typeof field
+		console.log(field)
 
-		if (!validationRes.valid) {
+		// console.log(vres)
+
+		if (!vres) {
 			return
 		}
 	}
@@ -69,8 +65,8 @@ async function submitLogin(evt: Event) {
 	try {
 		const { data } = await loginSendRequest({
 			data: {
-				Username: formValue.value.username,
-				Password: formValue.value.password
+				Username: form.username,
+				Password: form.password,
 			}
 		})
 
@@ -78,7 +74,7 @@ async function submitLogin(evt: Event) {
 
 		if (!res.success || !res.body) {
 			authStore.login(false, res.body)
-			setFieldError('password', 'Incorrect username or password')
+			// setFieldError('password', 'Incorrect username or password')
 			return
 		}
 		authStore.login(true, res.body)
@@ -96,10 +92,12 @@ async function submitLogin(evt: Event) {
 LoginForm(:loading="isLoading" @keyup.enter="submitLogin")
 	.login-container
 		h1.login-title Log in
-		BInput#username(class="login-input" placeholder='Username' name='username' v-model='formValue.username')
-		BInput#password(placeholder='Password' name='password' v-model='formValue.password')
+		BInput#username(class='login-input' placeholder='Username' name='username' v-model='form.username' :validator="v$.username")
+		BInput#password(placeholder='Password' name='password' v-model='form.password' :validator="v$.password")
+
 		.field
-			BButton(:type="BloomaTypes.Primary" @click="submitLogin" :action="true").login-btn Log in
+			BButton.login-btn(:type="BloomaTypes.Primary" @click="submitLogin" :action="true") Log in
+			//- BButton.login-btn(:type="BloomaTypes.Primary" @click="validate" :action="true") Validate
 		.login-button-container
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/signup")') Sign Up
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/demo")') Demo
@@ -151,4 +149,4 @@ LoginForm(:loading="isLoading" @keyup.enter="submitLogin")
 		width: 350px;
 	}
 }
-</style>
+</style>@/blooma/composables/useBForm

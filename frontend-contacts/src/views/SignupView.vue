@@ -4,12 +4,6 @@ import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring
-} from 'zod';
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type LoginResponse from '@/responseTypes/LoginResponse';
 import type SignupRequest from '@/requestTypes/SignupRequest';
@@ -23,32 +17,10 @@ import LoginForm from '@/components/LoginForm.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const formSchema = toTypedSchema(
-	zobject({
-		username: zstring()
-			.min(4, { message: 'Username must be at least 4 characters long' })
-			.refine(checkUsernameCached, "Username not available")
-		,
-		password: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-		,
-		confirmPassword: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-			.refine(s => s === formValue.value.password, { message: 'Passwords do not match' })
-		,
-	})
-)
-
 const formValue = ref<SignupRequest>({
 	username: '',
 	password: '',
 	confirmPassword: ''
-})
-
-const prevUsername = ref('dummyuser')
-
-const { errors, meta, validate, submitForm, setFieldError } = useForm<SignupRequest>({
-	validationSchema: formSchema
 })
 
 const {

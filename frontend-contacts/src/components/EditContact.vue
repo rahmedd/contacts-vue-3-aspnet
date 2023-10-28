@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import { ref, type PropType, onMounted, computed, toValue } from 'vue';
-import { useForm, useFieldArray } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring,
-	array as zarray,
-} from 'zod';
+import { ref, type PropType, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
@@ -37,54 +30,10 @@ const emits = defineEmits<{
 	mode: [mode: EditContactModes],
 }>()
 
-const {
-	data: contact,
-	isLoading: isLoading,
-	isFinished: isFinished,
-	execute: execute,
-	
-} = useAxios<BaseReponse<ContactResponse>>(`Contact/${props.contact.id}`, { method: 'GET' }, apiClient, { immediate: false })
-
-// const cField = zobject({
-// 	abc: zstring()
-// 		.min(4, { message: 'Username must be at least 4 characters long' })
-// })
-
-const formSchema = toTypedSchema(
-	zobject({
-		firstname: zstring()
-			.min(4, { message: 'Username must be at least 4 characters long' })
-			// .refine(checkUsernameCached, "Username not available")
-		,
-		lastname: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-		,
-		customFields: zarray(
-			zobject({
-				fieldName: zstring()
-					.min(4, { message: 'fieldName must be at least 4 characters long' })
-				,
-				fieldValue: zstring()
-					.min(20, { message: 'fieldValue must be at least 4 characters long' })
-				,
-				fieldType: zstring()
-					.min(4, { message: 'fieldType must be at least 4 characters long' })
-				,
-			})
-		)
-	})
-)
 
 const formValue = ref<Contact>(
 	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
 )
-
-const { errors, validate, submitForm, setFieldError, values } = useForm<ContactResponse>({
-	initialValues: new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } })),
-	validationSchema: formSchema
-})
-
-const { remove, push, fields } = useFieldArray('customFields');
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -139,30 +88,6 @@ div.edit-contact-container
 				BInput(:placeholder="field.fieldName" :name="field.internalId + `fieldvalue`" v-model="field.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false")
 			div.field-stack
 				p hello
-
-		//- div.row-split(v-for="field in formValue.customFields" :key="field.internalId")
-		//- 	div.field-stack
-		//- 		BInput(
-		//- 			:placeholder="`fieldName`"
-		//- 			:name="`fieldName`"
-		//- 			v-model="field.fieldValue"
-		//- 			:mode="BloomaValidationModes.Aggressive"
-		//- 			:debounce="250"
-		//- 			:showLabel="false"
-		//- 			:size="BloomaSizes.Small"
-		//- 		)
-
-		div.row-split(v-for="(field, idx) in fields" :key="field.key")
-			div.field-stack
-				BInput(
-					:placeholder="`fieldName`"
-					:name="`fieldName`"
-					v-model="formValue.customFields[idx].fieldName"
-					:mode="BloomaValidationModes.Aggressive"
-					:debounce="250"
-					:showLabel="false"
-					:size="BloomaSizes.Small"
-				)
 
 		div.row-split
 			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
