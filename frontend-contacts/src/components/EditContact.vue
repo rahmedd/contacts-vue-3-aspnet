@@ -1,12 +1,5 @@
 <script setup lang="ts">
 import { ref, type PropType, onMounted, computed, toValue } from 'vue';
-import { useForm, useFieldArray } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring,
-	array as zarray,
-} from 'zod';
 import { useAuthStore } from '@/stores/auth'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'

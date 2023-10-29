@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import { ref, unref } from 'vue';
+import { reactive, ref, unref } from 'vue';
 import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring
-} from 'zod';
+import useValidate from 'vue-tiny-validate';
+
 import type BaseReponse from '@/responseTypes/BaseResponse';
 import type LoginResponse from '@/responseTypes/LoginResponse';
 import type SignupRequest from '@/requestTypes/SignupRequest';
@@ -23,33 +19,51 @@ import LoginForm from '@/components/LoginForm.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const formSchema = toTypedSchema(
-	zobject({
-		username: zstring()
-			.min(4, { message: 'Username must be at least 4 characters long' })
-			.refine(checkUsernameCached, "Username not available")
-		,
-		password: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-		,
-		confirmPassword: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-			.refine(s => s === formValue.value.password, { message: 'Passwords do not match' })
-		,
-	})
-)
+// const form = reactive<SignupRequest>({
+// 	username: '',
+// 	password: '',
+// 	confirmPassword: ''
+// })
 
-const formValue = ref<SignupRequest>({
+const form = reactive({
 	username: '',
 	password: '',
-	confirmPassword: ''
+	confirmPassword: '',
+	customFields: [
+		{ vKey: 1, fieldName: '', fieldValue: '123-123-1234', fieldType: 'PHONE' },
+		{ vKey: 2, fieldName: 'Mobile', fieldValue: '321-123-1234', fieldType: 'PHONE' },
+		{ vKey: 3, fieldName: 'Fax', fieldValue: '456-789-4321', fieldType: 'PHONE' },
+	],
 })
 
-const prevUsername = ref('dummyuser')
-
-const { errors, meta, validate, submitForm, setFieldError } = useForm<SignupRequest>({
-	validationSchema: formSchema
+const valRules = reactive({
+	firstname: {
+		name: 'required',
+		test: (value) => Boolean(value),
+		message: 'Name must not be empty.'
+	},
+	lastname: {
+		name: 'required',
+		test: (value) => Boolean(value),
+		message: 'Name must not be empty.'
+	},
+	customFields: {}
 })
+
+form.customFields.forEach(field => {
+	valRules[field.vKey] = {
+		name: 'required',
+		test: (value) => Boolean(value),
+		message: 'Name must not be empty.'		
+	}
+})
+
+const valOptions = reactive({
+	// autoTouch: true,
+	touchOnTest: true,
+})
+
+const { result } = useValidate(form, valRules, valOptions);
 
 const {
 	data: loginRes,
@@ -68,8 +82,8 @@ async function submitSignup(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		const res = await validate()
-		await submitForm()
+		const res = await result.value.$test()
+		console.log(res)
 
 		if (!res.valid) {
 			return
@@ -83,8 +97,8 @@ async function submitSignup(evt: Event) {
 	try {
 		const { data } = await loginSendRequest({
 			data: {
-				Username: formValue.value.username,
-				Password: formValue.value.password
+				Username: form.username,
+				Password: form.password
 			}
 		})
 
@@ -92,7 +106,7 @@ async function submitSignup(evt: Event) {
 
 		if (!res.success) {
 			authStore.login(false, res.body)
-			setFieldError('password', 'Error creating account')
+			// setFieldError('password', 'Error creating account')
 			return
 		}
 	}
@@ -132,9 +146,9 @@ async function checkUsernameCached(username: string) {
 LoginForm(:loading="isLoading" @keyup.enter="submitSignup")
 	.login-container
 		h1.login-title Sign up
-		BInput#username.login-input(placeholder='Username' name='username' v-model='formValue.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")
-		BInput#password(placeholder='Password' name='password' v-model='formValue.password' :show-success="true" :debounce="250")
-		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword' :show-success="true" :debounce="250")
+		BInput#username.login-input(placeholder='Username' name='username' v-model='form.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")
+		BInput#password(placeholder='Password' name='password' v-model='form.password' :show-success="true" :debounce="250")
+		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='form.confirmPassword' :show-success="true" :debounce="250")
 		.field
 			BButton(:type="BloomaTypes.Primary" @click="submitSignup").login-btn Sign Up
 		.login-button-container

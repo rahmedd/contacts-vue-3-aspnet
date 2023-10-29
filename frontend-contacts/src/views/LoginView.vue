@@ -2,13 +2,6 @@
 import { ref, unref } from 'vue';
 import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring
-} from 'zod';
-
 import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
 
