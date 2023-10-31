@@ -21,6 +21,7 @@ import BButton from '@/blooma/BButton.vue'
 import BInput from '@/blooma/BInput.vue'
 import BModal from '@/blooma/BModal.vue'
 import BForm from '@/blooma/BForm.vue'
+import CustomField from '@/components/CustomField.vue'
 
 
 const props = defineProps({
@@ -37,22 +38,38 @@ const emits = defineEmits<{
 
 const form = reactive<Contact>(
 	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
+	// new Contact(props.contact.firstname, props.contact.lastname, [])
 )
+
+const customFields = reactive<ContactCustomField[]>(props.contact.customFields.map(f => { return { ...f } }))
 
 const isRequired = helpers.withMessage('Required', required)
 const rules = {
 	firstname: { isRequired },
 	lastname: { isRequired },
-	customFields: {
-		$each: helpers.forEach({
-			fieldName: { isRequired, },
-			fieldType: { isRequired, },
-			fieldValue: { isRequired, },
-		}),
-	},
+	// customFields: {
+	// 	$each: helpers.forEach({
+	// 		fieldName: { isRequired, },
+	// 		fieldType: { isRequired, },
+	// 		fieldValue: { isRequired, },
+	// 	}),
+	// },
 }
 
+// const cfRules = {
+// 	firstname: { isRequired },
+// 	lastname: { isRequired },
+// 	customFields: {
+// 		$each: helpers.forEach({
+// 			fieldName: { isRequired, },
+// 			fieldType: { isRequired, },
+// 			fieldValue: { isRequired, },
+// 		}),
+// 	},
+// }
+
 const v$ = useVuelidate(rules, form)
+// const vcf$ = useVuelidate(cfRules, form)
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -83,7 +100,6 @@ function toggleDeleteModal() {
 async function DEV_VALIDATE() {
 	const res = await v$.value.$validate()
 	console.log(v$.value)
-	window.vali = v$.value
 }
 
 function log(str: string) {
@@ -95,6 +111,19 @@ function getValidator(collection: string, guid: string) {
 	// console.log(vali)
 }
 
+function updateCustomField(field: ContactCustomField) {
+	const idx = form.customFields.findIndex(f => f.internalId = field.internalId)
+	if (idx > -1) {
+		console.log(idx)
+		console.log('updateCustomField: field not found')
+		return
+	}
+	console.log('continue!')
+	form.customFields[idx].fieldName = field.fieldName
+	form.customFields[idx].fieldType = field.fieldType
+	form.customFields[idx].fieldValue = field.fieldValue
+}
+
 onMounted(() => {
 	emits('mode', mode.value)
 })
@@ -104,16 +133,11 @@ onMounted(() => {
 div.edit-contact-container
 	BForm.contact-form(@input="edited" :loading="false")
 		div.row-split
-			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
-			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
+			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :val$="v$.firstname" :debounce="250")
+			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
 		div.row-split(v-for="field in form.customFields")
 			div.field-stack
-				BInput(:placeholder="field.fieldName" :name="`fieldname`" v-model="field.fieldName" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false" :size="BloomaSizes.Small")
-				BInput(:placeholder="field.fieldName" :name="`fieldvalue`" v-model="field.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false")
-				p {{ getValidator('','') }}
-			div.field-stack
-				p {{ field.fieldType }}
-
+				CustomField(:field="field" @update="updateCustomField")
 		div.row-split
 			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
 				//- span Add Field
