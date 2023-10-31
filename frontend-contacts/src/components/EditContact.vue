@@ -38,38 +38,15 @@ const emits = defineEmits<{
 
 const form = reactive<Contact>(
 	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
-	// new Contact(props.contact.firstname, props.contact.lastname, [])
 )
-
-const customFields = reactive<ContactCustomField[]>(props.contact.customFields.map(f => { return { ...f } }))
 
 const isRequired = helpers.withMessage('Required', required)
 const rules = {
-	firstname: { isRequired },
-	lastname: { isRequired },
-	// customFields: {
-	// 	$each: helpers.forEach({
-	// 		fieldName: { isRequired, },
-	// 		fieldType: { isRequired, },
-	// 		fieldValue: { isRequired, },
-	// 	}),
-	// },
+	firstname: { isRequired, },
+	lastname: { isRequired, },
 }
 
-// const cfRules = {
-// 	firstname: { isRequired },
-// 	lastname: { isRequired },
-// 	customFields: {
-// 		$each: helpers.forEach({
-// 			fieldName: { isRequired, },
-// 			fieldType: { isRequired, },
-// 			fieldValue: { isRequired, },
-// 		}),
-// 	},
-// }
-
 const v$ = useVuelidate(rules, form)
-// const vcf$ = useVuelidate(cfRules, form)
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -97,20 +74,6 @@ function toggleDeleteModal() {
 	deleteModal.value = !deleteModal.value
 }
 
-async function DEV_VALIDATE() {
-	const res = await v$.value.$validate()
-	console.log(v$.value)
-}
-
-function log(str: string) {
-	console.log(str)
-}
-
-function getValidator(collection: string, guid: string) {
-	// const vali = v$.value.customFields.$each.$response.$data[]
-	// console.log(vali)
-}
-
 function updateCustomField(field: ContactCustomField) {
 	const idx = form.customFields.findIndex(f => f.internalId = field.internalId)
 	if (idx > -1) {
@@ -123,6 +86,12 @@ function updateCustomField(field: ContactCustomField) {
 	form.customFields[idx].fieldType = field.fieldType
 	form.customFields[idx].fieldValue = field.fieldValue
 }
+
+async function DEV_VALIDATE() {
+	const res = await v$.value.$validate()
+	console.log(v$.value)
+}
+
 
 onMounted(() => {
 	emits('mode', mode.value)
