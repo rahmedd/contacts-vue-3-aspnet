@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, watch, ref, inject, type PropType, type Ref } from 'vue';
+import { computed, watch, ref, inject, type PropType} from 'vue'
 import { useDebounceFn } from '@vueuse/core'
-import { Icon } from '@iconify/vue';
-import { BFormStateKey, FormLoadingKey } from '@/blooma/symbols';
-import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
-import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes';
-import { BloomaSizes } from '@/blooma/enums/BloomaSizes';
-import type { Validation } from '@vuelidate/core';
+import { Icon } from '@iconify/vue'
+import { BFormStateKey, FormLoadingKey } from '@/blooma/symbols'
+import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
+import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
+import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
 
 const props = defineProps({
 	modelValue: String,
@@ -40,15 +39,13 @@ const props = defineProps({
 		type: String as PropType<BloomaSizes>,
 		default: BloomaSizes.Default,
 	},
-	validator: {
+	val$: {
 		type: Object // vuelidate types don't work
 	}
 })
 
 const emits = defineEmits(['update:modelValue'])
-
 const formLoading = inject(FormLoadingKey)
-// const v$: Ref<Validation<Vargs, T>> = inject(BFormStateKey)
 
 const inputValue = ref<string>(props.modelValue || '')
 
@@ -60,14 +57,28 @@ const meta = {
 }
 
 const inputClasses = computed(() => {
-	const validated = meta.validated && !meta.pending
+	const v$ = props.val$
 
+	// if validator was not passed return default input
+	if (!v$) {
+		return {
+			input: true,
+			validated: false,
+			[props.size]: !!props.size,
+			[BloomaTypes.Danger]: false,
+			[BloomaTypes.Success]: false,
+		}
+	}
+
+	// const validated = v$.validated && !v$.pending
+	const validated = v$.$dirty && !v$.$pending
+	
 	return {
 		input: true,
 		validated: validated,
 		[props.size]: !!props.size,
-		[BloomaTypes.Danger]: validated && !meta.valid,
-		[BloomaTypes.Success]: validated && meta.valid && props.showSuccess,
+		[BloomaTypes.Danger]: validated && v$.$invalid,
+		[BloomaTypes.Success]: validated && v$.$invalid && props.showSuccess,
 	}
 })
 
@@ -91,64 +102,78 @@ const inputClasses = computed(() => {
 // })
 
 // validate on blur
-async function validateOnBlur(evt: Event) {
+async function validateOnBlur(evt: any) {
 	// handleBlur(evt)
 	// setTouched(true)
 	// validate()
+	if (!props.val$) {
+		return
+	}
+
+	props.val$.$touch()
 }
 
 // validate on change after blur
-async function validateOnInput(evt: Event) {
+async function validateOnInput(evt: any) {
 	// handleChange(evt, false)
 	// setTouched(true)
 	// validate()
-}
 
-async function handleValidationMode(evt: Event) {
-	const val = (evt.target as HTMLInputElement).value
-	emits('update:modelValue', val) // update model value
+	// update parent 
+	emits('update:modelValue', evt.target.value) // update model value
 
-	const mode: BloomaValidationModes = props.mode
-
-	switch (evt.type) {
-		case 'blur':
-			switch (mode) {
-				case BloomaValidationModes.Aggressive:
-					await validateOnBlur(evt)
-					break;
-				case BloomaValidationModes.Eager:
-					await validateOnBlur(evt)
-					break;
-				case BloomaValidationModes.Lazy:
-					await validateOnBlur(evt)
-					break;
-				case BloomaValidationModes.Passive:
-					break;
-			}
-			break;
-
-		case 'input':
-			switch (mode) {
-				case BloomaValidationModes.Aggressive:
-					await validateOnInput(evt)
-					break;
-				case BloomaValidationModes.Eager:
-					if (!meta.touched) {
-						break;
-					}
-					await validateOnInput(evt)
-					break;
-				case BloomaValidationModes.Lazy:
-					// Issue with vee-validate, executing validations even though validateOnValueUpdate: false
-					break;
-				case BloomaValidationModes.Passive:
-					break;
-			}
-			break;
+	if (!props.val$) {
+		return
 	}
 
-	// await debounceinputClasses()
+	await props.val$.$touch()
 }
+
+// async function handleValidationMode(evt: Event) {
+// 	const val = (evt.target as HTMLInputElement).value
+// 	emits('update:modelValue', val) // update model value
+
+// 	const mode: BloomaValidationModes = props.mode
+
+// 	switch (evt.type) {
+// 		case 'blur':
+// 			switch (mode) {
+// 				case BloomaValidationModes.Aggressive:
+// 					await validateOnBlur(evt)
+// 					break;
+// 				case BloomaValidationModes.Eager:
+// 					await validateOnBlur(evt)
+// 					break;
+// 				case BloomaValidationModes.Lazy:
+// 					await validateOnBlur(evt)
+// 					break;
+// 				case BloomaValidationModes.Passive:
+// 					break;
+// 			}
+// 			break;
+
+// 		case 'input':
+// 			switch (mode) {
+// 				case BloomaValidationModes.Aggressive:
+// 					await validateOnInput(evt)
+// 					break;
+// 				case BloomaValidationModes.Eager:
+// 					if (!meta.touched) {
+// 						break;
+// 					}
+// 					await validateOnInput(evt)
+// 					break;
+// 				case BloomaValidationModes.Lazy:
+// 					// Issue with vee-validate, executing validations even though validateOnValueUpdate: false
+// 					break;
+// 				case BloomaValidationModes.Passive:
+// 					break;
+// 			}
+// 			break;
+// 	}
+
+// 	await debounceinputClasses()
+// }
 
 // const handleValidationModeDebounce = useDebounceFn(handleValidationMode, props.debounce)
 
@@ -169,16 +194,19 @@ div.field
 			:class="inputClasses"
 			:placeholder="placeholder"
 			:disabled="formLoading"
+			@blur="validateOnBlur"
+			@input="validateOnInput"
 		)
 		span(v-if="icon").icon.is-small.is-left
 			icon(:icon="icon")
 		span.icon.is-small.is-right
-			template(v-if="meta.touched")
+			template(v-if="val$ && val$.$dirty")
 				icon(v-if="loading" icon="eos-icons:loading" width="22")
 				icon(v-else-if="inputClasses[BloomaTypes.Danger]" icon="icon-park-solid:attention" class="field-icon-error" width="22")
 				icon(v-else-if="inputClasses[BloomaTypes.Success]" icon='icon-park-solid:check-one' class="field-icon-success" width="22")
 	Transition
-		div(v-if="inputClasses[BloomaTypes.Danger] && errorMessage").help.is-danger {{ errorMessage }}
+		div.help.is-danger(v-if="inputClasses[BloomaTypes.Danger] && val$ && val$.$errors[0] && val$.$errors[0].$message") {{ val$.$errors[0].$message }}
+		//- div(v-if="true  && val$ && val$.$errors[0] && val$.$errors[0].$message").help.is-danger {{ val$.$errors[0].$message }}
 </template>
 
 <style lang="scss" scoped>

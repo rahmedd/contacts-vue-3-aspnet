@@ -27,14 +27,14 @@ const router = createRouter({
 			}
 			
 		},
-		// {
-		// 	path: '/signup',
-		// 	name: 'signup',
-		// 	component: SignupView,
-		// 	meta: {
-		// 		requiresAuth: false
-		// 	}
-		// },
+		{
+			path: '/signup',
+			name: 'signup',
+			component: SignupView,
+			meta: {
+				requiresAuth: false
+			}
+		},
 		{
 			path: '/demo',
 			name: 'demo',
@@ -43,14 +43,14 @@ const router = createRouter({
 				requiresAuth: true
 			}
 		},
-		// {
-		// 	path: '/contact',
-		// 	name: 'contact',
-		// 	component: ContactView,
-		// 	meta: {
-		// 		requiresAuth: true
-		// 	}
-		// },
+		{
+			path: '/contact',
+			name: 'contact',
+			component: ContactView,
+			meta: {
+				requiresAuth: true
+			}
+		},
 		// {
 		// 	path: '/about',
 		// 	name: 'about',

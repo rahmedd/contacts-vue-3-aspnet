@@ -7,9 +7,9 @@ export class ContactCustomField {
 	fieldType: ContactCustomFieldTypes
 
 	constructor(fieldName: string, fieldValue: string, fieldType: ContactCustomFieldTypes) {
+		this.internalId = self.crypto.randomUUID()
 		this.fieldName = fieldName
 		this.fieldType = fieldType
 		this.fieldValue = fieldValue
-		this.internalId = self.crypto.randomUUID()
 	}
 }

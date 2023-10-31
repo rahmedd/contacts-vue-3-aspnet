@@ -5,7 +5,7 @@ import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
 import { useVuelidate } from '@vuelidate/core'
-import { required, email } from '@vuelidate/validators'
+import { helpers, required } from '@vuelidate/validators'
 // import { useBForm } from '@/blooma/composables/useBForm';
 
 import type BaseReponse from '@/responseTypes/BaseResponse';
@@ -27,13 +27,13 @@ const form = reactive<LoginRequest>({
 	password: '',
 })
 
+const isRequired = helpers.withMessage('Required', required)
 const rules = {
-	username: { required, email },
-	password: { required },
+	username: { isRequired },
+	password: { isRequired },
 }
 
 const v$ = useVuelidate(rules, form)
-
 
 const {
 	data: loginRes,
@@ -47,10 +47,6 @@ async function submitLogin(evt: Event) {
 
 	try {
 		const vres = await v$.value.$validate()
-		const field = v$.value.username
-		type abc = typeof field
-		console.log(field)
-
 		// console.log(vres)
 
 		if (!vres) {
@@ -92,8 +88,8 @@ async function submitLogin(evt: Event) {
 LoginForm(:loading="isLoading" @keyup.enter="submitLogin")
 	.login-container
 		h1.login-title Log in
-		BInput#username(class='login-input' placeholder='Username' name='username' v-model='form.username' :validator="v$.username")
-		BInput#password(placeholder='Password' name='password' v-model='form.password' :validator="v$.password")
+		BInput#username.login-input(placeholder="Username" name="username" v-model="form.username" :val$="v$.username")
+		BInput#password(placeholder="Password" name="password" v-model="form.password" :val$="v$.password")
 
 		.field
 			BButton.login-btn(:type="BloomaTypes.Primary" @click="submitLogin" :action="true") Log in

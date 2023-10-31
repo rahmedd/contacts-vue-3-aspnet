@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { ref, unref } from 'vue';
+import { reactive, ref, unref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAxios } from '@vueuse/integrations/useAxios'
-import apiClient from '@/services/axios';
+import apiClient from '@/services/axios'
 import { useAuthStore } from '@/stores/auth'
-import type BaseReponse from '@/responseTypes/BaseResponse';
-import type LoginResponse from '@/responseTypes/LoginResponse';
-import type SignupRequest from '@/requestTypes/SignupRequest';
-import type UsernameRequest from '@/requestTypes/UsernameRequest';
-import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
-import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes';
+import { useVuelidate } from '@vuelidate/core'
+import { required, helpers } from '@vuelidate/validators'
+
+import type BaseReponse from '@/responseTypes/BaseResponse'
+import type LoginResponse from '@/responseTypes/LoginResponse'
+import type SignupRequest from '@/requestTypes/SignupRequest'
+import type UsernameRequest from '@/requestTypes/UsernameRequest'
+import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
+import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
+
 import BInput from '@/blooma/BInput.vue'
 import BButton from '@/blooma/BButton.vue'
 import LoginForm from '@/components/LoginForm.vue'
@@ -17,11 +21,20 @@ import LoginForm from '@/components/LoginForm.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const formValue = ref<SignupRequest>({
+const form = reactive<SignupRequest>({
 	username: '',
 	password: '',
-	confirmPassword: ''
+	confirmPassword: '',
 })
+
+const isRequired = helpers.withMessage('Required', required)
+const rules = {
+	username: { isRequired },
+	password: { isRequired },
+	confirmPassword: { isRequired },
+}
+
+const v$ = useVuelidate(rules, form)
 
 const {
 	data: loginRes,
@@ -40,10 +53,10 @@ async function submitSignup(evt: Event) {
 	evt.preventDefault()
 
 	try {
-		const res = await validate()
-		await submitForm()
+		const vres = await v$.value.$validate()
+		console.log(vres)
 
-		if (!res.valid) {
+		if (!vres) {
 			return
 		}
 	}
@@ -55,8 +68,8 @@ async function submitSignup(evt: Event) {
 	try {
 		const { data } = await loginSendRequest({
 			data: {
-				Username: formValue.value.username,
-				Password: formValue.value.password
+				Username: form.username,
+				Password: form.password
 			}
 		})
 
@@ -64,7 +77,7 @@ async function submitSignup(evt: Event) {
 
 		if (!res.success) {
 			authStore.login(false, res.body)
-			setFieldError('password', 'Error creating account')
+			// setFieldError('password', 'Error creating account')
 			return
 		}
 	}
@@ -104,11 +117,11 @@ async function checkUsernameCached(username: string) {
 LoginForm(:loading="isLoading" @keyup.enter="submitSignup")
 	.login-container
 		h1.login-title Sign up
-		BInput#username.login-input(placeholder='Username' name='username' v-model='formValue.username' :show-success="true" :mode="BloomaValidationModes.Aggressive" :debounce="250")
-		BInput#password(placeholder='Password' name='password' v-model='formValue.password' :show-success="true" :debounce="250")
-		BInput#confirmPassword(placeholder='Confirm password' name='confirmPassword' v-model='formValue.confirmPassword' :show-success="true" :debounce="250")
+		BInput#username.login-input(placeholder="Username" name="username" v-model="form.username" :showSuccess="true" :mode="BloomaValidationModes.Aggressive" :debounce="250" :val$="v$.username")
+		BInput#password(placeholder="Password" name="password" v-model="form.password" :showSuccess="true" :debounce="250" :val$="v$.password")
+		BInput#confirmPassword(placeholder="Confirm password" name="confirmPassword" v-model="form.confirmPassword" :showSuccess="true" :debounce="250" :val$="v$.confirmPassword")
 		.field
-			BButton(:type="BloomaTypes.Primary" @click="submitSignup").login-btn Sign Up
+			BButton.login-btn(:type="BloomaTypes.Primary" @click="submitSignup") Sign Up
 		.login-button-container
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/login")') Log in
 			BButton.login-signup-link(:type="BloomaTypes.Ghost" @click='$router.push("/demo")') Demo

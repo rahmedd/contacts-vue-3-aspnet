@@ -1,22 +1,27 @@
 <script setup lang="ts">
-import { ref, type PropType, onMounted } from 'vue';
+import { ref, type PropType, onMounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAxios } from '@vueuse/integrations/useAxios'
+import apiClient from '@/services/axios'
+import { useVuelidate } from '@vuelidate/core'
+import { required, helpers } from '@vuelidate/validators'
+
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { Contact } from '@/requestTypes/Contact'
-import { ContactResponse } from '@/responseTypes/ContactResponse';
-import type BaseReponse from '@/responseTypes/BaseResponse';
-import type User from '@/responseTypes/User';
+import { ContactResponse } from '@/responseTypes/ContactResponse'
+import type BaseReponse from '@/responseTypes/BaseResponse'
+import type User from '@/responseTypes/User'
 import { EditContactModes } from '@/enums/EditContactModes'
-import apiClient from '@/services/axios';
-import { Icon } from '@iconify/vue';
+import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
+
+import { Icon } from '@iconify/vue'
 import BButton from '@/blooma/BButton.vue'
 import BInput from '@/blooma/BInput.vue'
-import BModal from '@/blooma/BModal.vue';
-import BForm from '@/blooma/BForm.vue';
-import { BloomaSizes } from '@/blooma/enums/BloomaSizes';
-import type { ContactCustomField } from '@/requestTypes/ContactCustomField';
+import BModal from '@/blooma/BModal.vue'
+import BForm from '@/blooma/BForm.vue'
+
 
 const props = defineProps({
 	contact: {
@@ -30,10 +35,24 @@ const emits = defineEmits<{
 	mode: [mode: EditContactModes],
 }>()
 
-
-const formValue = ref<Contact>(
+const form = reactive<Contact>(
 	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
 )
+
+const isRequired = helpers.withMessage('Required', required)
+const rules = {
+	firstname: { isRequired },
+	lastname: { isRequired },
+	customFields: {
+		$each: helpers.forEach({
+			fieldName: { isRequired, },
+			fieldType: { isRequired, },
+			fieldValue: { isRequired, },
+		}),
+	},
+}
+
+const v$ = useVuelidate(rules, form)
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -62,12 +81,18 @@ function toggleDeleteModal() {
 }
 
 async function DEV_VALIDATE() {
-	const res = await validate()
-	console.log(res)
+	const res = await v$.value.$validate()
+	console.log(v$.value)
+	window.vali = v$.value
 }
 
 function log(str: string) {
 	console.log(str)
+}
+
+function getValidator(collection: string, guid: string) {
+	// const vali = v$.value.customFields.$each.$response.$data[]
+	// console.log(vali)
 }
 
 onMounted(() => {
@@ -79,15 +104,15 @@ onMounted(() => {
 div.edit-contact-container
 	BForm.contact-form(@input="edited" :loading="false")
 		div.row-split
-			BInput(placeholder='First name' name='firstname' v-model='formValue.firstname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
-			BInput(placeholder='Last name' name='lastname' v-model='formValue.lastname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
-		//- div.row-split(v-for="field in formValue.customFields")
-			p {{ field }}
+			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
+			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
+		div.row-split(v-for="field in form.customFields")
 			div.field-stack
-				BInput(:placeholder="field.fieldName" :name="field.internalId + `fieldname`" v-model="field.fieldName" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false" :size="BloomaSizes.Small")
-				BInput(:placeholder="field.fieldName" :name="field.internalId + `fieldvalue`" v-model="field.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false")
+				BInput(:placeholder="field.fieldName" :name="`fieldname`" v-model="field.fieldName" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false" :size="BloomaSizes.Small")
+				BInput(:placeholder="field.fieldName" :name="`fieldvalue`" v-model="field.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false")
+				p {{ getValidator('','') }}
 			div.field-stack
-				p hello
+				p {{ field.fieldType }}
 
 		div.row-split
 			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
