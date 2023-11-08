@@ -1,29 +1,28 @@
 <script setup lang="ts">
-import { ref, type PropType, onMounted, computed, toValue } from 'vue';
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import {
-	object as zobject,
-	string as zstring,
-	array as zarray,
-} from 'zod';
+import { ref, type PropType, onMounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAxios } from '@vueuse/integrations/useAxios'
+import apiClient from '@/services/axios'
+import { useVuelidate } from '@vuelidate/core'
+import { required, helpers } from '@vuelidate/validators'
+
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { Contact } from '@/requestTypes/Contact'
-import { ContactResponse } from '@/responseTypes/ContactResponse';
-import type BaseReponse from '@/responseTypes/BaseResponse';
-import type User from '@/responseTypes/User';
+import { ContactResponse } from '@/responseTypes/ContactResponse'
+import type BaseReponse from '@/responseTypes/BaseResponse'
+import type User from '@/responseTypes/User'
 import { EditContactModes } from '@/enums/EditContactModes'
-import apiClient from '@/services/axios';
-import { Icon } from '@iconify/vue';
+import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
+
+import { Icon } from '@iconify/vue'
 import BButton from '@/blooma/BButton.vue'
 import BInput from '@/blooma/BInput.vue'
-import BModal from '@/blooma/BModal.vue';
-import BForm from '@/blooma/BForm.vue';
-import { BloomaSizes } from '@/blooma/enums/BloomaSizes';
-import type { ContactCustomField } from '@/requestTypes/ContactCustomField';
+import BModal from '@/blooma/BModal.vue'
+import BForm from '@/blooma/BForm.vue'
+import CustomField from '@/components/CustomField.vue'
+
 
 const props = defineProps({
 	contact: {
@@ -37,51 +36,17 @@ const emits = defineEmits<{
 	mode: [mode: EditContactModes],
 }>()
 
-const {
-	data: contact,
-	isLoading: isLoading,
-	isFinished: isFinished,
-	execute: execute,
-	
-} = useAxios<BaseReponse<ContactResponse>>(`Contact/${props.contact.id}`, { method: 'GET' }, apiClient, { immediate: false })
-
-// const cField = zobject({
-// 	abc: zstring()
-// 		.min(4, { message: 'Username must be at least 4 characters long' })
-// })
-
-const formSchema = toTypedSchema(
-	zobject({
-		firstname: zstring()
-			.min(4, { message: 'Username must be at least 4 characters long' })
-			// .refine(checkUsernameCached, "Username not available")
-		,
-		lastname: zstring()
-			.min(8, { message: 'Passsword must be at least 8 characters long' })
-		,
-		customFields: zarray(
-			zobject({
-				fieldName: zstring()
-					.min(4, { message: 'fieldName must be at least 4 characters long' })
-				,
-				fieldValue: zstring()
-					.min(20, { message: 'fieldValue must be at least 4 characters long' })
-				,
-				fieldType: zstring()
-					.min(4, { message: 'fieldType must be at least 4 characters long' })
-				,
-			})
-		)
-	})
-)
-
-const formValue = ref<Contact>(
+const form = reactive<Contact>(
 	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
 )
 
-const { errors, validate, submitForm, setFieldError } = useForm<ContactResponse>({
-	validationSchema: formSchema
-})
+const isRequired = helpers.withMessage('Required', required)
+const rules = {
+	firstname: { isRequired, },
+	lastname: { isRequired, },
+}
+
+const v$ = useVuelidate(rules, form)
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -109,9 +74,24 @@ function toggleDeleteModal() {
 	deleteModal.value = !deleteModal.value
 }
 
-function log(str: string) {
-	console.log(str)
+function updateCustomField(field: ContactCustomField) {
+	const idx = form.customFields.findIndex(f => f.internalId = field.internalId)
+	if (idx > -1) {
+		console.log(idx)
+		console.log('updateCustomField: field not found')
+		return
+	}
+	console.log('continue!')
+	form.customFields[idx].fieldName = field.fieldName
+	form.customFields[idx].fieldType = field.fieldType
+	form.customFields[idx].fieldValue = field.fieldValue
 }
+
+async function DEV_VALIDATE() {
+	const res = await v$.value.$validate()
+	console.log(v$.value)
+}
+
 
 onMounted(() => {
 	emits('mode', mode.value)
@@ -122,26 +102,11 @@ onMounted(() => {
 div.edit-contact-container
 	BForm.contact-form(@input="edited" :loading="false")
 		div.row-split
-			BInput(placeholder='First name' name='firstname' v-model='formValue.firstname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
-			BInput(placeholder='Last name' name='lastname' v-model='formValue.lastname' :mode="BloomaValidationModes.Aggressive" :debounce="250")
-		//- div.row-split(v-for="field in formValue.customFields")
-			p {{ field }}
+			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :val$="v$.firstname" :debounce="250")
+			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
+		div.row-split(v-for="field in form.customFields")
 			div.field-stack
-				BInput(:placeholder="field.fieldName" :name="field.internalId + `fieldname`" v-model="field.fieldName" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false" :size="BloomaSizes.Small")
-				BInput(:placeholder="field.fieldName" :name="field.internalId + `fieldvalue`" v-model="field.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false")
-			div.field-stack
-				p hello
-		//- div.row-split(v-for="(field, idx) in formValue.customFields" :key="field.internalId")
-		//- 	BInput(
-		//- 		:placeholder="field.fieldName"
-		//- 		:name="`fieldName`"
-		//- 		v-model="field.fieldName"
-		//- 		:mode="BloomaValidationModes.Aggressive"
-		//- 		:debounce="250"
-		//- 		:showLabel="false"
-		//- 		:size="BloomaSizes.Small"
-		//- 	)
-
+				CustomField(:field="field" @update="updateCustomField")
 		div.row-split
 			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
 				//- span Add Field
@@ -149,6 +114,7 @@ div.edit-contact-container
 
 	div.button-bar
 		BButton(:type="BloomaTypes.Primary" @click="saveContact" :disabled="mode === EditContactModes.VIEW") Save
+		BButton(:type="BloomaTypes.Primary" @click="DEV_VALIDATE") Save
 		BButton(:type="BloomaTypes.Danger" @click="toggleDeleteModal")
 			span.icon
 				Icon(icon="mdi:trash" height="22")
