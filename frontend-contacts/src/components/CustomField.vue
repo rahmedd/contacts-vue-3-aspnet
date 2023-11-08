@@ -32,7 +32,6 @@ const rules = {
 const v$ = useVuelidate(rules, form)
 
 function updateField() {
-	console.log('updated')
 	emits('update', { ...form })
 }
 

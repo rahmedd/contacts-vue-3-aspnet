@@ -29,7 +29,10 @@ const form = reactive<SignupRequest>({
 
 const isRequired = helpers.withMessage('Required', required)
 const rules = {
-	username: { isRequired },
+	username: {
+		isRequired,
+		isUnique: helpers.withAsync(checkUsernameCached),
+	},
 	password: { isRequired },
 	confirmPassword: { isRequired },
 }
@@ -87,17 +90,9 @@ async function submitSignup(evt: Event) {
 	}
 }
 
-const debouncedRequest = checkUsernameSendRequest
-
 async function checkUsernameCached(username: string) {
-	// if (prevUsername.value === username) {
-	// 	return !!checkUsernameRes?.value?.success
-	// }
-
-	// prevUsername.value = username
-
 	try {
-		const res = await debouncedRequest({
+		const res = await checkUsernameSendRequest({
 			data: {
 				Username: username,
 			},

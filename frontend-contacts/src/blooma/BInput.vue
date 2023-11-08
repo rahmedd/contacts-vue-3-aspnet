@@ -45,8 +45,8 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['update:modelValue'])
-const formLoading = inject(FormLoadingKey)
 
+const formLoading = inject(FormLoadingKey)
 const inputValue = ref<string>(props.modelValue || '')
 
 const meta = {
@@ -70,15 +70,14 @@ const inputClasses = computed(() => {
 		}
 	}
 
-	// const validated = v$.validated && !v$.pending
 	const validated = v$.$dirty && !v$.$pending
-	
+
 	return {
 		input: true,
-		validated: validated,
+		validated: !!validated,
 		[props.size]: !!props.size,
-		[BloomaTypes.Danger]: validated && v$.$invalid,
-		[BloomaTypes.Success]: validated && v$.$invalid && props.showSuccess,
+		[BloomaTypes.Danger]: !!(validated && v$.$invalid),
+		[BloomaTypes.Success]: !!(validated && !v$.$invalid && props.showSuccess),
 	}
 })
 
@@ -110,7 +109,7 @@ async function validateOnBlur(evt: any) {
 		return
 	}
 
-	props.val$.$touch()
+	await props?.val$?.$touch()
 }
 
 // validate on change after blur
@@ -119,61 +118,67 @@ async function validateOnInput(evt: any) {
 	// setTouched(true)
 	// validate()
 
-	// update parent 
-	emits('update:modelValue', evt.target.value) // update model value
-
 	if (!props.val$) {
 		return
 	}
 
-	await props.val$.$touch()
+	await props?.val$?.$touch()
 }
 
-// async function handleValidationMode(evt: Event) {
-// 	const val = (evt.target as HTMLInputElement).value
-// 	emits('update:modelValue', val) // update model value
+function updateParent(val: string) {
+	emits('update:modelValue', val) // update model value
+}
 
-// 	const mode: BloomaValidationModes = props.mode
+const updateParentDebounced = useDebounceFn(updateParent, props.debounce)
+const touchDebounced = useDebounceFn(async () => await props?.val$?.$touch(), props.debounce)
 
-// 	switch (evt.type) {
-// 		case 'blur':
-// 			switch (mode) {
-// 				case BloomaValidationModes.Aggressive:
-// 					await validateOnBlur(evt)
-// 					break;
-// 				case BloomaValidationModes.Eager:
-// 					await validateOnBlur(evt)
-// 					break;
-// 				case BloomaValidationModes.Lazy:
-// 					await validateOnBlur(evt)
-// 					break;
-// 				case BloomaValidationModes.Passive:
-// 					break;
-// 			}
-// 			break;
+async function handleValidationMode(evt: Event) {
+	const val = (evt.target as HTMLInputElement).value
+	const mode: BloomaValidationModes = props.mode
+	const v$ = props.val$ || {}
 
-// 		case 'input':
-// 			switch (mode) {
-// 				case BloomaValidationModes.Aggressive:
-// 					await validateOnInput(evt)
-// 					break;
-// 				case BloomaValidationModes.Eager:
-// 					if (!meta.touched) {
-// 						break;
-// 					}
-// 					await validateOnInput(evt)
-// 					break;
-// 				case BloomaValidationModes.Lazy:
-// 					// Issue with vee-validate, executing validations even though validateOnValueUpdate: false
-// 					break;
-// 				case BloomaValidationModes.Passive:
-// 					break;
-// 			}
-// 			break;
-// 	}
+	// updateParent(val)
+	await updateParentDebounced(val)
 
-// 	await debounceinputClasses()
-// }
+	switch (evt.type) {
+		case 'blur':
+			switch (mode) {
+				case BloomaValidationModes.Aggressive:
+					await validateOnBlur(evt)
+					break;
+				case BloomaValidationModes.Eager:
+					await validateOnBlur(evt)
+					break;
+				case BloomaValidationModes.Lazy:
+					await validateOnBlur(evt)
+					break;
+				case BloomaValidationModes.Passive:
+					break;
+			}
+			break;
+
+		case 'input':
+			switch (mode) {
+				case BloomaValidationModes.Aggressive:
+					// await validateOnInput(evt)
+					await touchDebounced()
+					break;
+				case BloomaValidationModes.Eager:
+					if (!v$.$dirty) {
+						break;
+					}
+					await validateOnInput(evt)
+					break;
+				case BloomaValidationModes.Lazy:
+					// Issue with vee-validate, executing validations even though validateOnValueUpdate: false
+					break;
+				case BloomaValidationModes.Passive:
+					break;
+			}
+			break;
+	}
+	// await debounceinputClasses()
+}
 
 // const handleValidationModeDebounce = useDebounceFn(handleValidationMode, props.debounce)
 
@@ -181,6 +186,16 @@ const controlClasses = computed(() => ({
 	'has-icons-left': !!props.icon,
 	'has-icons-right': true
 }))
+
+const fieldMsg = computed(() => {
+	const hasError = inputClasses.value[BloomaTypes.Danger]
+	const msg: string = props?.val$?.$errors[0]?.$message || ''
+	if (hasError && msg) {
+		return msg
+	}
+
+	return ''
+})
 
 </script>
 
@@ -194,8 +209,8 @@ div.field
 			:class="inputClasses"
 			:placeholder="placeholder"
 			:disabled="formLoading"
-			@blur="validateOnBlur"
-			@input="validateOnInput"
+			@blur="handleValidationMode"
+			@input="handleValidationMode"
 		)
 		span(v-if="icon").icon.is-small.is-left
 			icon(:icon="icon")
@@ -205,8 +220,7 @@ div.field
 				icon(v-else-if="inputClasses[BloomaTypes.Danger]" icon="icon-park-solid:attention" class="field-icon-error" width="22")
 				icon(v-else-if="inputClasses[BloomaTypes.Success]" icon='icon-park-solid:check-one' class="field-icon-success" width="22")
 	Transition
-		div.help.is-danger(v-if="inputClasses[BloomaTypes.Danger] && val$ && val$.$errors[0] && val$.$errors[0].$message") {{ val$.$errors[0].$message }}
-		//- div(v-if="true  && val$ && val$.$errors[0] && val$.$errors[0].$message").help.is-danger {{ val$.$errors[0].$message }}
+		div.help.is-danger(v-if="fieldMsg") {{ fieldMsg }}
 </template>
 
 <style lang="scss" scoped>
