@@ -5,7 +5,7 @@ import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios'
 import { useAuthStore } from '@/stores/auth'
 import { useVuelidate } from '@vuelidate/core'
-import { required, helpers } from '@vuelidate/validators'
+import { required, helpers, minLength } from '@vuelidate/validators'
 
 import type BaseReponse from '@/responseTypes/BaseResponse'
 import type LoginResponse from '@/responseTypes/LoginResponse'
@@ -31,7 +31,35 @@ const isRequired = helpers.withMessage('Required', required)
 const rules = {
 	username: {
 		isRequired,
-		isUnique: helpers.withAsync(checkUsernameCached),
+		// isUnique: helpers.withAsync(checkUsernameCached),
+		// isUnique: helpers.withMessage('Not Unique', helpers.withAsync(checkUsernameCached))
+		// minLength: helpers.withMessage(
+		// 	({
+		// 		$pending,
+		// 		$invalid,
+		// 		$params,
+		// 		$model
+		// 	}) => `This field has a value of '${$model}' but must have a min length of ${JSON.stringify($params)} so it is ${$invalid ? 'invalid' : 'valid'}`,
+		// 	helpers.withAsync(async () => ({ $message: 'please work' }))
+		// )
+		unique: {
+			$async: true,
+			// the trick
+			$message: ({ $response }: { $response: { $valid: boolean, yourErrorMessage: boolean } }) => {
+				return $response?.yourErrorMessage ?? 'default error message'
+			},
+			$validator: async (value: string) => {
+				if (value === '')
+					return true;
+
+				const response = await checkUsernameCached(value)
+
+				return {
+					$valid: response.success,
+					yourErrorMessage: response.message,
+				}
+			},
+		}
 	},
 	password: { isRequired },
 	confirmPassword: { isRequired },
@@ -50,7 +78,7 @@ const {
 	data: checkUsernameRes,
 	execute: checkUsernameSendRequest,
 	isLoading: checkUsernameLoading,
-} = useAxios<BaseReponse<undefined>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false, resetOnExecute: false })
+} = useAxios<BaseReponse<null>>('Auth/CheckUsername', { method: 'POST' }, apiClient, { immediate: false, resetOnExecute: false })
 
 async function submitSignup(evt: Event) {
 	evt.preventDefault()
@@ -90,7 +118,7 @@ async function submitSignup(evt: Event) {
 	}
 }
 
-async function checkUsernameCached(username: string) {
+async function checkUsernameCached(username: string): Promise<BaseReponse<null>> {
 	try {
 		const res = await checkUsernameSendRequest({
 			data: {
@@ -98,11 +126,14 @@ async function checkUsernameCached(username: string) {
 			},
 		})
 
-		return res.data.value?.success
+		return res.data.value!
 	}
 	catch (ex) {
-
-		return checkUsernameRes.value?.success
+		return {
+			body: null,
+			message: '',
+			success: false,
+		}
 	}
 }
 
