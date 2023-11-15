@@ -6,8 +6,11 @@ import { helpers, required, email } from '@vuelidate/validators'
 import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+import { ContactCustomFieldTypes } from "@/enums/ContactCustomFieldTypes"
+// import { MappingEnum } from '@/types/MappingEnum'
 
 import BInput from '@/blooma/BInput.vue'
+import BSelect from '@/blooma/BSelect.vue'
 
 const props = defineProps({
 	field: {
@@ -35,17 +38,57 @@ function updateField() {
 	emits('update', { ...form })
 }
 
+const fieldTypes = Object.keys(ContactCustomFieldTypes).filter((v) => isNaN(Number(v)));
+
+// const mapping = {
+// 	[ContactCustomFieldTypes.TDATE]: 'Date',
+// 	[ContactCustomFieldTypes.TSTRING]: 'Text',
+// }
+
 </script>
 
 <template lang="pug">
-div(@input="updateField")
-	BInput(placeholder="Field Name" :name="`fieldname`" v-model="form.fieldName" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false" :size="BloomaSizes.Small" :val$="v$.fieldName")
-	BInput(placeholder="Field Value" :name="`fieldvalue`" v-model="form.fieldValue" :mode="BloomaValidationModes.Aggressive" :debounce="250" :showLabel="false" :val$="v$.fieldValue")
+div.field(@input="updateField")
+	BInput(
+		placeholder="Field Name"
+		name="Field Name"
+		v-model="form.fieldName"
+		:debounce="250"
+		:showLabel="true"
+		:val$="v$.fieldName"
+	)
+	BInput(
+		placeholder="Field Value"
+		name="Field Value"
+		v-model="form.fieldValue"
+		:debounce="250"
+		:showLabel="true"
+		:val$="v$.fieldValue"
+		:date="form.fieldType === ContactCustomFieldTypes.DATE"
+	)
+div.field
+	BSelect(
+		placeholder="Field Type"
+		name="Field Type"
+		v-model="form.fieldType"
+		:mode="BloomaValidationModes.Aggressive"
+		:debounce="250"
+		:showLabel="true"
+		:val$="v$.fieldValue"
+		:list="ContactCustomFieldTypes"
+	)
 
 </template>
 
 <style lang="scss" scoped>
 @import '@/blooma/vars.scss';
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
+
+.field {
+	width: 100%;
+}
+.field:not(:last-child) {
+	margin-right: 10px;
+}
 
 </style>

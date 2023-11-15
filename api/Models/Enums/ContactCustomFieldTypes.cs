@@ -4,4 +4,7 @@ public enum ContactCustomFieldTypes
 {
 	TSTRING,
 	TDATE,
+	TEMAIL,
+	TPHONE,
+	TSECRET,
 }

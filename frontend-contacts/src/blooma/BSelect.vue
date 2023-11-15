@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { computed, watch, ref, inject, type PropType} from 'vue'
+import { computed, watch, ref, inject, type PropType } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
-import { Icon } from '@iconify/vue'
+
 import { BFormStateKey, FormLoadingKey } from '@/blooma/symbols'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+import { ContactCustomField } from '@/requestTypes/ContactCustomField'
+import { ContactCustomFieldTypes } from '@/enums/ContactCustomFieldTypes'
+
+import { Icon } from '@iconify/vue'
+import BButton from '@/blooma//BButton.vue'
 
 const props = defineProps({
-	modelValue: String,
+	modelValue: Number,
 	placeholder: String,
 	icon: String,
 	name: {
@@ -42,16 +47,17 @@ const props = defineProps({
 	val$: {
 		type: Object // vuelidate types don't work
 	},
-	// TODO: replace with datepicker component
-	date: {
-		type: Boolean
-	}
+	list: {
+		type: Object as PropType<ContactCustomField>,
+		required: true,
+	},
 })
 
 const emits = defineEmits(['update:modelValue'])
 
 const formLoading = inject(FormLoadingKey)
 const inputValue = ref<string>(props.modelValue || '')
+const open = ref<boolean>(false)
 
 const meta = {
 	validated: false,
@@ -85,30 +91,8 @@ const inputClasses = computed(() => {
 	}
 })
 
-// const inputClassesDebounced = ref({
-// 	input: true,
-// 	validated: false,
-// 	[props.size]: true,
-// 	[BloomaTypes.Danger]: false,
-// 	[BloomaTypes.Success]: false,
-// })
-
-// const debounceinputClasses = useDebounceFn(() => {
-// 	inputClassesDebounced.value.validated = inputClasses.value.validated
-// 	inputClassesDebounced.value[props.size] = inputClasses.value[props.size]
-// 	inputClassesDebounced.value[BloomaTypes.Danger] = inputClasses.value[BloomaTypes.Danger]
-// 	inputClassesDebounced.value[BloomaTypes.Success] = inputClasses.value[BloomaTypes.Success]
-// }, 50)
-
-// watch(inputClasses, async () => {
-// 	await debounceinputClasses()
-// })
-
 // validate on blur
 async function validateOnBlur(evt: any) {
-	// handleBlur(evt)
-	// setTouched(true)
-	// validate()
 	if (!props.val$) {
 		return
 	}
@@ -118,10 +102,6 @@ async function validateOnBlur(evt: any) {
 
 // validate on change after blur
 async function validateOnInput(evt: any) {
-	// handleChange(evt, false)
-	// setTouched(true)
-	// validate()
-
 	if (!props.val$) {
 		return
 	}
@@ -130,7 +110,7 @@ async function validateOnInput(evt: any) {
 }
 
 function updateParent(val: string) {
-	emits('update:modelValue', val) // update model value
+	emits('update:modelValue', parseInt(val)) // update model value
 }
 
 const updateParentDebounced = useDebounceFn(updateParent, props.debounce)
@@ -181,10 +161,7 @@ async function handleValidationMode(evt: Event) {
 			}
 			break;
 	}
-	// await debounceinputClasses()
 }
-
-// const handleValidationModeDebounce = useDebounceFn(handleValidationMode, props.debounce)
 
 const controlClasses = computed(() => ({
 	'has-icons-left': !!props.icon,
@@ -201,21 +178,54 @@ const fieldMsg = computed(() => {
 	return ''
 })
 
+function loadFromEnum(evt: Event) {
+	const val = (evt.target as HTMLInputElement).value
+	return
+}
+
+function saveFromEnum(evt: Event) {
+	const val = (evt.target as HTMLInputElement).value
+	return
+}
+
+function toggleDropdown() {
+	open.value = !open.value;
+}
+
+const fieldTypes = Object.keys(props.list).filter((v) => isNaN(Number(v)));
+const fieldValues = Object.values(props.list)
+
 </script>
 
 <template lang="pug">
 div.field
 	label.label(v-show="showLabel") {{ placeholder }}
 	div.control(:class="controlClasses")
-		input(
+		//- div.dropdown(:class="{ 'is-active': open }")
+		//- 	div.dropdown-trigger
+		//- 		BButton(aria-haspopup='true' aria-controls='dropdown-menu' @click="toggleDropdown")
+		//- 			span {{ fieldTypes[parseInt(inputValue)] }}
+		//- 			span.icon.is-small
+		//- 				icon(icon='icon-park-solid:check-one' class="field-icon-success" width="22")
+		//- 				//- i.fas.fa-angle-down(aria-hidden='true')
+		//- 	div#dropdown-menu.dropdown-menu(role='menu')
+		//- 		div.dropdown-content
+		//- 			a.dropdown-item(v-for="field in fieldTypes" :class="{ 'is-active': inputValue === ContactCustomFieldTypes[field] }") {{ field }}
+					//- a.dropdown-item Other dropdown item
+					//- a.dropdown-item.is-active Active dropdown item
+					//- a.dropdown-item Other dropdown item
+					//- hr.dropdown-divider
+					//- a.dropdown-item Text
+
+		select(
 			v-model="inputValue"
-			:type="date ? 'date' : 'text'"
 			:class="inputClasses"
 			:placeholder="placeholder"
 			:disabled="formLoading"
 			@blur="handleValidationMode"
 			@input="handleValidationMode"
 		)
+			option(v-for="field in fieldTypes" :value="ContactCustomFieldTypes[field]") {{ field }}
 		span(v-if="icon").icon.is-small.is-left
 			icon(:icon="icon")
 		span.icon.is-small.is-right
@@ -267,11 +277,11 @@ div.field
 /* we will explain what these classes do next! */
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.2s ease;
+	transition: opacity 0.2s ease;
 }
 
 .v-enter-from,
 .v-leave-to {
-  opacity: 0;
+	opacity: 0;
 }
 </style>

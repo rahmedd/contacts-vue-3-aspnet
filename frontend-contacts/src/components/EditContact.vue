@@ -75,13 +75,12 @@ function toggleDeleteModal() {
 }
 
 function updateCustomField(field: ContactCustomField) {
-	const idx = form.customFields.findIndex(f => f.internalId = field.internalId)
-	if (idx > -1) {
-		console.log(idx)
+	const idx = form.customFields.findIndex(f => f.internalId === field.internalId)
+	if (idx < 0) {
 		console.log('updateCustomField: field not found')
 		return
 	}
-	console.log('continue!')
+
 	form.customFields[idx].fieldName = field.fieldName
 	form.customFields[idx].fieldType = field.fieldType
 	form.customFields[idx].fieldValue = field.fieldValue
@@ -105,8 +104,10 @@ div.edit-contact-container
 			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :val$="v$.firstname" :debounce="250")
 			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
 		div.row-split(v-for="field in form.customFields")
-			div.field-stack
-				CustomField(:field="field" @update="updateCustomField")
+			CustomField(:field="field" @update="updateCustomField")
+			//- CustomField(:field="field" @update="updateCustomField")
+			//- div.field-stack
+			//- 	CustomField(:field="field" @update="updateCustomField")
 		div.row-split
 			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
 				//- span Add Field
@@ -153,6 +154,7 @@ $gap: 15px;
 
 	margin-left: $gap;
 	margin-right: $gap;
+	margin-bottom: $gap;
 }
 
 .field {
@@ -162,15 +164,15 @@ $gap: 15px;
 	margin-right: 10px;
 }
 
-.field-stack {
-	display: flex;
-	flex-direction: column;
+// .field-stack {
+// 	display: flex;
+// 	flex-direction: column;
 
-	.field {
-		height: 50px;
-		margin: 0;
-	}
-}
+// 	.field {
+// 		height: 50px;
+// 		margin: 0;
+// 	}
+// }
 
 .button-bar {
 	display: flex;

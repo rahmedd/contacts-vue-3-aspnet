@@ -1,4 +1,4 @@
 export enum ContactCustomFieldTypes {
-	TSTRING,
-	TDATE,
+	TEXT,
+	DATE,
 }
