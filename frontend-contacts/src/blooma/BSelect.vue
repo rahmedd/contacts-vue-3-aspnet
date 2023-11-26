@@ -187,6 +187,7 @@ function toggleDropdown() {
 
 function selectDropdown(fieldType: ContactCustomFieldTypes) {
 	inputValue.value = fieldType
+	emits('update:modelValue', fieldType)
 }
 
 function onClickAway(event: Event) {
@@ -202,7 +203,7 @@ const fieldValues = Object.values(props.list)
 div.field
 	label.label(v-show="showLabel") {{ placeholder }}
 	//- div.control(:class="controlClasses")
-	div.dropdown.is-hoverable(:class="{ 'is-active': open }" v-click-away="onClickAway")
+	div.dropdown(:class="{ 'is-active': open }" v-click-away="onClickAway")
 		div.dropdown-trigger
 			BButton(aria-haspopup='true' aria-controls='dropdown-menu' @click="toggleDropdown")
 				div.b-button-dropdown

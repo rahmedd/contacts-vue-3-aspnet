@@ -48,42 +48,47 @@ const fieldTypes = Object.keys(ContactCustomFieldTypes).filter((v) => isNaN(Numb
 </script>
 
 <template lang="pug">
-div.field(@input="updateField")
-	BInput(
-		placeholder="Field Name"
-		name="Field Name"
-		v-model="form.fieldName"
-		:debounce="250"
-		:showLabel="true"
-		:val$="v$.fieldName"
-	)
-div.field
-	BInput(
-		placeholder="Field Value"
-		name="Field Value"
-		v-model="form.fieldValue"
-		:debounce="250"
-		:showLabel="true"
-		:val$="v$.fieldValue"
-		:date="form.fieldType === ContactCustomFieldTypes.DATE"
-	)
-div.field
-	BSelect.field-is-small(
-		placeholder="Field Type"
-		name="Field Type"
-		v-model="form.fieldType"
-		:mode="BloomaValidationModes.Aggressive"
-		:debounce="250"
-		:showLabel="true"
-		:val$="v$.fieldType"
-		:list="ContactCustomFieldTypes"
-	)
+div.field-row(@input="updateField")
+	div.field
+		BInput(
+			placeholder="Field Name"
+			name="Field Name"
+			v-model="form.fieldName"
+			:debounce="250"
+			:showLabel="true"
+			:val$="v$.fieldName"
+		)
+	div.field
+		BInput(
+			placeholder="Field Value"
+			name="Field Value"
+			v-model="form.fieldValue"
+			:debounce="250"
+			:showLabel="true"
+			:val$="v$.fieldValue"
+			:date="form.fieldType === ContactCustomFieldTypes.DATE"
+		)
+	div.field
+		BSelect.field-is-small(
+			placeholder="Field Type"
+			name="Field Type"
+			v-model="form.fieldType"
+			:mode="BloomaValidationModes.Aggressive"
+			:debounce="250"
+			:showLabel="true"
+			:val$="v$.fieldType"
+			:list="ContactCustomFieldTypes"
+		)
 
 </template>
 
 <style lang="scss" scoped>
 @import '@/blooma/vars.scss';
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
+
+.field-row {
+	display: flex;
+}
 
 .field {
 	width: 250px;
