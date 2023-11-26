@@ -109,9 +109,9 @@ div.edit-contact-container
 			//- div.field-stack
 			//- 	CustomField(:field="field" @update="updateCustomField")
 		div.row-split
-			BButton.row-button(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
-				//- span Add Field
-				Icon(icon="typcn:plus" height="22")
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
+				b Add field
+				Icon(icon="ci:add-row" height="24")
 
 	div.button-bar
 		BButton(:type="BloomaTypes.Primary" @click="saveContact" :disabled="mode === EditContactModes.VIEW") Save
@@ -158,10 +158,15 @@ $gap: 15px;
 }
 
 .field {
-	width: 50%;
+	width: 250px;
 }
 .field:not(:last-child) {
 	margin-right: 10px;
+}
+.add-field {
+	b {
+		margin-right: 8px;
+	}
 }
 
 // .field-stack {

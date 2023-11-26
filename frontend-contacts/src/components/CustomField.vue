@@ -57,6 +57,7 @@ div.field(@input="updateField")
 		:showLabel="true"
 		:val$="v$.fieldName"
 	)
+div.field
 	BInput(
 		placeholder="Field Value"
 		name="Field Value"
@@ -67,7 +68,7 @@ div.field(@input="updateField")
 		:date="form.fieldType === ContactCustomFieldTypes.DATE"
 	)
 div.field
-	BSelect(
+	BSelect.field-is-small(
 		placeholder="Field Type"
 		name="Field Type"
 		v-model="form.fieldType"
@@ -85,8 +86,13 @@ div.field
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
 .field {
-	width: 100%;
+	width: 250px;
 }
+
+.field-is-small {
+	width: 125px;
+}
+
 .field:not(:last-child) {
 	margin-right: 10px;
 }

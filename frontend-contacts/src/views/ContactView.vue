@@ -96,7 +96,7 @@ div.contact-container
 
 .contact-layout {
 	display: grid;
-	grid-template-columns: 100px 280px 500px;
+	grid-template-columns: 100px 280px 800px;
 	grid-template-rows: 60px 1fr;
 	gap: 0px 0px;
 	// grid-auto-flow: row;
