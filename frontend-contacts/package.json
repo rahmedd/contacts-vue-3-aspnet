@@ -24,7 +24,8 @@
     "pinia": "^2.0.36",
     "pinia-plugin-persistedstate": "^3.1.0",
     "vue": "^3.3.2",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.2.0",
+    "vue3-click-away": "^1.2.4"
   },
   "devDependencies": {
     "@iconify/vue": "^4.1.1",

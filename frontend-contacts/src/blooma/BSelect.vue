@@ -13,7 +13,10 @@ import { Icon } from '@iconify/vue'
 import BButton from '@/blooma//BButton.vue'
 
 const props = defineProps({
-	modelValue: Number,
+	modelValue: {
+		type: Number,
+		required: true,
+	},
 	placeholder: String,
 	icon: String,
 	name: {
@@ -56,7 +59,7 @@ const props = defineProps({
 const emits = defineEmits(['update:modelValue'])
 
 const formLoading = inject(FormLoadingKey)
-const inputValue = ref<string>(props.modelValue || '')
+const inputValue = ref<number>(props.modelValue)
 const open = ref<boolean>(false)
 
 const meta = {
@@ -178,18 +181,16 @@ const fieldMsg = computed(() => {
 	return ''
 })
 
-function loadFromEnum(evt: Event) {
-	const val = (evt.target as HTMLInputElement).value
-	return
-}
-
-function saveFromEnum(evt: Event) {
-	const val = (evt.target as HTMLInputElement).value
-	return
-}
-
 function toggleDropdown() {
 	open.value = !open.value;
+}
+
+function selectDropdown(fieldType: ContactCustomFieldTypes) {
+	inputValue.value = fieldType
+}
+
+function onClickAway(event: Event) {
+	open.value = false
 }
 
 const fieldTypes = Object.keys(props.list).filter((v) => isNaN(Number(v)));
@@ -200,39 +201,37 @@ const fieldValues = Object.values(props.list)
 <template lang="pug">
 div.field
 	label.label(v-show="showLabel") {{ placeholder }}
-	div.control(:class="controlClasses")
-		//- div.dropdown(:class="{ 'is-active': open }")
-		//- 	div.dropdown-trigger
-		//- 		BButton(aria-haspopup='true' aria-controls='dropdown-menu' @click="toggleDropdown")
-		//- 			span {{ fieldTypes[parseInt(inputValue)] }}
-		//- 			span.icon.is-small
-		//- 				icon(icon='icon-park-solid:check-one' class="field-icon-success" width="22")
-		//- 				//- i.fas.fa-angle-down(aria-hidden='true')
-		//- 	div#dropdown-menu.dropdown-menu(role='menu')
-		//- 		div.dropdown-content
-		//- 			a.dropdown-item(v-for="field in fieldTypes" :class="{ 'is-active': inputValue === ContactCustomFieldTypes[field] }") {{ field }}
-					//- a.dropdown-item Other dropdown item
-					//- a.dropdown-item.is-active Active dropdown item
-					//- a.dropdown-item Other dropdown item
-					//- hr.dropdown-divider
-					//- a.dropdown-item Text
+	//- div.control(:class="controlClasses")
+	div.dropdown.is-hoverable(:class="{ 'is-active': open }" v-click-away="onClickAway")
+		div.dropdown-trigger
+			BButton(aria-haspopup='true' aria-controls='dropdown-menu' @click="toggleDropdown")
+				div.b-button-dropdown
+					span {{ fieldTypes[inputValue] }}
+					span.icon.is-small
+						template(v-if="val$ && val$.$dirty")
+							icon(v-if="loading" icon="eos-icons:loading" width="22")
+							icon(v-else-if="inputClasses[BloomaTypes.Danger]" icon="icon-park-solid:attention" class="field-icon-error" width="22")
+							icon(v-else-if="inputClasses[BloomaTypes.Success]" icon='icon-park-solid:check-one' class="field-icon-success" width="22")
+		div#dropdown-menu.dropdown-menu(role='menu')
+			div.dropdown-content
+				a.dropdown-item(
+					v-for="field in fieldTypes"
+					:class="{ 'is-active': inputValue === ContactCustomFieldTypes[field] }"
+					:value="field"
+					@click="selectDropdown(ContactCustomFieldTypes[field])"
+				) {{ field }}
 
-		select(
-			v-model="inputValue"
-			:class="inputClasses"
-			:placeholder="placeholder"
-			:disabled="formLoading"
-			@blur="handleValidationMode"
-			@input="handleValidationMode"
-		)
-			option(v-for="field in fieldTypes" :value="ContactCustomFieldTypes[field]") {{ field }}
-		span(v-if="icon").icon.is-small.is-left
-			icon(:icon="icon")
-		span.icon.is-small.is-right
-			template(v-if="val$ && val$.$dirty")
-				icon(v-if="loading" icon="eos-icons:loading" width="22")
-				icon(v-else-if="inputClasses[BloomaTypes.Danger]" icon="icon-park-solid:attention" class="field-icon-error" width="22")
-				icon(v-else-if="inputClasses[BloomaTypes.Success]" icon='icon-park-solid:check-one' class="field-icon-success" width="22")
+		//- select(
+		//- 	v-model="inputValue"
+		//- 	:class="inputClasses"
+		//- 	:placeholder="placeholder"
+		//- 	:disabled="formLoading"
+		//- 	@blur="handleValidationMode"
+		//- 	@input="handleValidationMode"
+		//- )
+		//- 	option(v-for="field in fieldTypes" :value="ContactCustomFieldTypes[field]") {{ field }}
+		span.icon.is-small.is-left(v-if="icon")
+			//- icon(:icon="icon")
 	Transition
 		div.help.is-danger(v-if="fieldMsg") {{ fieldMsg }}
 </template>
@@ -272,6 +271,22 @@ div.field
 
 .input {
 	transition: border-color 0.2s ease;
+}
+
+.b-button-dropdown {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.dropdown, .dropdown-trigger{
+	width: 100%
+}
+
+.dropdown-trigger > button {
+	width: 100%;
+	text-align: left;
 }
 
 /* we will explain what these classes do next! */

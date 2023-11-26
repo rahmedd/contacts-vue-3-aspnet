@@ -74,7 +74,7 @@ div.field
 		:mode="BloomaValidationModes.Aggressive"
 		:debounce="250"
 		:showLabel="true"
-		:val$="v$.fieldValue"
+		:val$="v$.fieldType"
 		:list="ContactCustomFieldTypes"
 	)
 
