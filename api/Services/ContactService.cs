@@ -123,7 +123,7 @@ public class ContactService
 			.Include(c => c.Users)
 			.Include(c => c.CustomFields);
 
-		var contact = await contactsQuery.FirstAsync();
+		var contact = await contactsQuery.FirstOrDefaultAsync();
 
 		return contact;
 	}

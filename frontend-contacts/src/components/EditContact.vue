@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type PropType, onMounted, reactive } from 'vue'
+import { ref, type PropType, onMounted, reactive, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios'
@@ -22,6 +22,7 @@ import BInput from '@/blooma/BInput.vue'
 import BModal from '@/blooma/BModal.vue'
 import BForm from '@/blooma/BForm.vue'
 import CustomField from '@/components/CustomField.vue'
+import { ContactCustomFieldTypes } from '@/enums/ContactCustomFieldTypes'
 
 
 const props = defineProps({
@@ -92,6 +93,8 @@ async function DEV_VALIDATE() {
 }
 
 
+const emailFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.EMAIL))
+
 onMounted(() => {
 	emits('mode', mode.value)
 })
@@ -101,13 +104,26 @@ onMounted(() => {
 div.edit-contact-container
 	BForm.contact-form(@input="edited" :loading="false")
 		div.row-split
+			h1.title.is-4 Name
+		div.row-split
 			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :val$="v$.firstname" :debounce="250")
 			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
+
+		div.row-split
+			h1.title.is-4 Email
+		div.row-split(v-for="field in form.customFields")
+			CustomField(:field="field" @update="updateCustomField" :simple="true")
+
+		//- div.row-split
+		//- 	h1.title.is-3 Phone
+		//- div.row-split(v-for="field in emailFields")
+		//- 	BInput(placeholder='Phone' name='phone' v-model='field.fieldValue' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
+
+		div.row-split
+			h1.title.is-4 Custom fields
 		div.row-split(v-for="field in form.customFields")
 			CustomField(:field="field" @update="updateCustomField")
-			//- CustomField(:field="field" @update="updateCustomField")
-			//- div.field-stack
-			//- 	CustomField(:field="field" @update="updateCustomField")
+
 		div.row-split
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
 				b Add field

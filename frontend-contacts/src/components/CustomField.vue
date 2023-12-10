@@ -17,6 +17,9 @@ const props = defineProps({
 		type: Object as PropType<ContactCustomField>,
 		required: true,
 	},
+	simple: {
+		type: Boolean,
+	}
 })
 
 const emits = defineEmits<{
@@ -51,8 +54,8 @@ const fieldTypes = Object.keys(ContactCustomFieldTypes).filter((v) => isNaN(Numb
 div.field-row(@input="updateField")
 	div.field
 		BInput(
-			placeholder="Field Name"
-			name="Field Name"
+			placeholder="Label"
+			name="fieldname"
 			v-model="form.fieldName"
 			:debounce="250"
 			:showLabel="true"
@@ -60,18 +63,18 @@ div.field-row(@input="updateField")
 		)
 	div.field
 		BInput(
-			placeholder="Field Value"
-			name="Field Value"
+			placeholder="Value"
+			name="fieldvalue"
 			v-model="form.fieldValue"
 			:debounce="250"
 			:showLabel="true"
 			:val$="v$.fieldValue"
 			:date="form.fieldType === ContactCustomFieldTypes.DATE"
 		)
-	div.field
+	div.field(v-if="!simple")
 		BSelect.field-is-small(
-			placeholder="Field Type"
-			name="Field Type"
+			placeholder="Type"
+			name="fieldtype"
 			v-model="form.fieldType"
 			:mode="BloomaValidationModes.Aggressive"
 			:debounce="250"

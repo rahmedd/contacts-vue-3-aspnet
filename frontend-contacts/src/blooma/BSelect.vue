@@ -186,6 +186,7 @@ function toggleDropdown() {
 }
 
 function selectDropdown(fieldType: ContactCustomFieldTypes) {
+	open.value = false
 	inputValue.value = fieldType
 	emits('update:modelValue', fieldType)
 }
