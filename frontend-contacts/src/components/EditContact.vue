@@ -103,30 +103,35 @@ onMounted(() => {
 <template lang="pug">
 div.edit-contact-container
 	BForm.contact-form(@input="edited" :loading="false")
-		div.row-split
+		div.row
 			h1.title.is-4 Name
 		div.row-split
 			BInput(placeholder='First name' name='firstname' v-model='form.firstname' :mode="BloomaValidationModes.Aggressive" :val$="v$.firstname" :debounce="250")
 			BInput(placeholder='Last name' name='lastname' v-model='form.lastname' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
 
-		div.row-split
+		hr
+		div.row
 			h1.title.is-4 Email
 		div.row-split(v-for="field in form.customFields")
 			CustomField(:field="field" @update="updateCustomField" :simple="true")
+		div.row
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
+				b New email
+				Icon(icon="ci:add-row" height="24")
 
 		//- div.row-split
 		//- 	h1.title.is-3 Phone
 		//- div.row-split(v-for="field in emailFields")
 		//- 	BInput(placeholder='Phone' name='phone' v-model='field.fieldValue' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
-
-		div.row-split
+		hr
+		div.row
 			h1.title.is-4 Custom fields
 		div.row-split(v-for="field in form.customFields")
 			CustomField(:field="field" @update="updateCustomField")
 
 		div.row-split
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
-				b Add field
+				b New custom field
 				Icon(icon="ci:add-row" height="24")
 
 	div.button-bar
@@ -149,7 +154,7 @@ div.edit-contact-container
 @import '@/blooma/vars.scss';
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
-$gap: 15px;
+$gap: 20px;
 .edit-contact-container {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -168,6 +173,12 @@ $gap: 15px;
 		width: 100%
 	}
 
+	margin-left: $gap;
+	margin-right: $gap;
+	// margin-bottom: $gap;
+}
+
+.row {
 	margin-left: $gap;
 	margin-right: $gap;
 	margin-bottom: $gap;
