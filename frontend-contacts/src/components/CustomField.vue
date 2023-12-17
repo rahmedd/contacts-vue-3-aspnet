@@ -94,7 +94,7 @@ div.field-row(@input="updateField")
 }
 
 .field {
-	width: 250px;
+	width: 240px;
 }
 
 .field-is-small {

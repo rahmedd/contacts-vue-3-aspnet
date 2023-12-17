@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type PropType } from 'vue';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
+import { EditContactModes } from '@/enums/EditContactModes';
 import { ContactResponse } from '@/responseTypes/ContactResponse';
 import BButton from '@/blooma/BButton.vue'
 
@@ -13,7 +14,11 @@ const props = defineProps({
 	selected: {
 		type: Number,
 		required: true,
-	}
+	},
+	mode: {
+		type: Object as PropType<EditContactModes>,
+		// required: true,
+	},
 })
 
 const emits = defineEmits<{
@@ -33,6 +38,7 @@ div
 		BButton(
 			:type="BloomaTypes.Primary"
 			:light="contact.id !== selected"
+			:disabled="mode === EditContactModes.EDIT"
 			@click="() => selectContact(contact.id)"
 		)
 			span {{ contact.firstname }} {{ contact.lastname }}
@@ -52,6 +58,10 @@ div
 	span {
 		width: 100%;
 	}
+}
+
+.button.is-primary[disabled] {
+	border: none;
 }
 
 </style>

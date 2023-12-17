@@ -58,6 +58,12 @@ function selectContact(id: number) {
 
 async function saveContact() {
 	mode.value = EditContactModes.VIEW
+	emits('mode', mode.value)
+}
+
+async function editContact() {
+	mode.value = EditContactModes.EDIT
+	emits('mode', mode.value)
 }
 
 async function deleteContact(id: number) {
@@ -66,9 +72,8 @@ async function deleteContact(id: number) {
 	return
 }
 
-function edited() {
-	mode.value = EditContactModes.EDIT
-	emits('mode', mode.value)
+async function edited() {
+	await editContact()
 }
 
 function toggleDeleteModal() {
@@ -93,7 +98,16 @@ async function DEV_VALIDATE() {
 }
 
 
+const customFields = computed(() => form.customFields.filter(f => 
+	// Does not include
+	![
+		ContactCustomFieldTypes.EMAIL,
+		ContactCustomFieldTypes.PHONE,
+	].includes(f.fieldType)
+))
 const emailFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.EMAIL))
+console.log(ContactCustomFieldTypes.PHONE)
+const phoneFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.PHONE))
 
 onMounted(() => {
 	emits('mode', mode.value)
@@ -102,7 +116,7 @@ onMounted(() => {
 
 <template lang="pug">
 div.edit-contact-container
-	BForm.contact-form(@input="edited" :loading="false")
+	BForm.contact-form(v-if="mode === EditContactModes.EDIT" @input="edited" :loading="false")
 		div.row
 			h1.title.is-4 Name
 		div.row-split
@@ -130,13 +144,49 @@ div.edit-contact-container
 			CustomField(:field="field" @update="updateCustomField")
 
 		div.row-split
-			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true")
 				b New custom field
 				Icon(icon="ci:add-row" height="24")
+	div.contact-form(v-else)
+		div.row.label Name
+		div.row
+			h1.title.is-4 {{ contact.firstname }} {{ contact.lastname }}
+
+		hr
+
+		template(v-if="phoneFields.length > 0")
+			div.row
+				h1.title.is-5 Phone
+			div(v-for="field in phoneFields")
+				div.row.label {{ field.fieldName }}
+				div.row
+					h1.title.is-5 {{ field.fieldValue }}
+
+			hr
+
+		template(v-if="emailFields.length > 0")
+			div.row
+				h1.title.is-5 Email
+			div(v-for="field in emailFields")
+				div.row.label {{ field.fieldName }}
+				div.row
+					h1.title.is-5 {{ field.fieldValue }}
+
+			hr
+
+		template(v-if="customFields.length > 0")
+			div.row
+				h1.title.is-5 Email
+			div(v-for="field in customFields")
+				div.row.label {{ field.fieldName }}
+				div.row
+					h1.title.is-5 {{ field.fieldValue }}
+
+			hr
 
 	div.button-bar
-		BButton(:type="BloomaTypes.Primary" @click="saveContact" :disabled="mode === EditContactModes.VIEW") Save
-		BButton(:type="BloomaTypes.Primary" @click="DEV_VALIDATE") Save
+		BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Primary" @click="saveContact") Save
+		BButton(v-else :type="BloomaTypes.Primary" @click="editContact") Edit
 		BButton(:type="BloomaTypes.Danger" @click="toggleDeleteModal")
 			span.icon
 				Icon(icon="mdi:trash" height="22")
@@ -205,6 +255,13 @@ $gap: 20px;
 // 		margin: 0;
 // 	}
 // }
+
+.label {
+	font-size: 0.9rem;
+	font-weight: 500;
+	margin-bottom: 4px;
+	color: #03363e;
+}
 
 .button-bar {
 	display: flex;

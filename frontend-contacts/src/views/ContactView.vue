@@ -78,7 +78,7 @@ div.contact-container
 		div.alphabet-container.scrollable
 			Alphabet
 		div.contact-select-container.scrollable
-			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" @update="selectContact")
+			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" :mode="viewMode" @update="selectContact")
 		div.contact-view-container.scrollable
 			EditContact(v-if="contact" :key="contact.id" :contact="contact" @mode="updateMode")
 			h1(v-else)
