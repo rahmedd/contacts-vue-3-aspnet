@@ -1,28 +1,33 @@
 <script setup lang="ts">
+// lib
 import { ref, type PropType, onMounted, reactive, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useAxios } from '@vueuse/integrations/useAxios'
 import apiClient from '@/services/axios'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
+import { useContact } from '@/composables/ContactMethods'
 
+// blooma
+import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
-import { Contact } from '@/requestTypes/Contact'
-import { ContactResponse } from '@/responseTypes/ContactResponse'
+
+// types
 import type BaseReponse from '@/responseTypes/BaseResponse'
 import type User from '@/responseTypes/User'
-import { EditContactModes } from '@/enums/EditContactModes'
-import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+import { ContactResponse } from '@/responseTypes/ContactResponse'
+import { Contact } from '@/requestTypes/Contact'
 import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
+import { ContactCustomFieldTypes } from '@/enums/ContactCustomFieldTypes'
+import { EditContactModes } from '@/enums/EditContactModes'
 
+// components
 import { Icon } from '@iconify/vue'
 import BButton from '@/blooma/BButton.vue'
 import BInput from '@/blooma/BInput.vue'
 import BModal from '@/blooma/BModal.vue'
 import BForm from '@/blooma/BForm.vue'
 import CustomField from '@/components/CustomField.vue'
-import { ContactCustomFieldTypes } from '@/enums/ContactCustomFieldTypes'
 
 
 const props = defineProps({
@@ -37,10 +42,11 @@ const emits = defineEmits<{
 	mode: [mode: EditContactModes],
 }>()
 
-const form = reactive<Contact>(
-	new Contact(props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
+const form = reactive(
+	new ContactResponse(props.contact.id, props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
 )
 
+//- vuelidate inject subform
 const isRequired = helpers.withMessage('Required', required)
 const rules = {
 	firstname: { isRequired, },
@@ -48,6 +54,11 @@ const rules = {
 }
 
 const v$ = useVuelidate(rules, form)
+
+// const {
+// 	update: updateContact,
+// 	state: contactState,
+// } = useContact()
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -57,6 +68,19 @@ function selectContact(id: number) {
 }
 
 async function saveContact() {
+	const res = await v$.value.$validate()
+	if (!res) {
+		return
+	}
+
+	try {
+		// const updateRes = await updateContact(form)
+		
+	}
+	catch (ex) {
+		console.log('saveContact error')
+	}
+
 	mode.value = EditContactModes.VIEW
 	emits('mode', mode.value)
 }
@@ -69,7 +93,6 @@ async function editContact() {
 async function deleteContact(id: number) {
 	// action
 	deleteModal.value = false
-	return
 }
 
 async function edited() {
@@ -92,21 +115,16 @@ function updateCustomField(field: ContactCustomField) {
 	form.customFields[idx].fieldValue = field.fieldValue
 }
 
-async function DEV_VALIDATE() {
-	const res = await v$.value.$validate()
-	console.log(v$.value)
-}
-
-
-const customFields = computed(() => form.customFields.filter(f => 
-	// Does not include
-	![
-		ContactCustomFieldTypes.EMAIL,
-		ContactCustomFieldTypes.PHONE,
-	].includes(f.fieldType)
-))
+const customFields = computed(() => 
+	form.customFields.filter(f => 
+		// Does not include
+		![
+			ContactCustomFieldTypes.EMAIL,
+			ContactCustomFieldTypes.PHONE,
+		].includes(f.fieldType)
+	)
+)
 const emailFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.EMAIL))
-console.log(ContactCustomFieldTypes.PHONE)
 const phoneFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.PHONE))
 
 onMounted(() => {
@@ -125,8 +143,19 @@ div.edit-contact-container
 
 		hr
 		div.row
+			h1.title.is-4 Phone
+		div.row-split(v-for="field in phoneFields")
+			//- vuelidate subform
+			CustomField(:field="field" @update="updateCustomField" :simple="true")
+		div.row
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
+				b New phone
+				Icon(icon="ci:add-row" height="24")
+
+		hr
+		div.row
 			h1.title.is-4 Email
-		div.row-split(v-for="field in form.customFields")
+		div.row-split(v-for="field in emailFields")
 			CustomField(:field="field" @update="updateCustomField" :simple="true")
 		div.row
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
@@ -140,7 +169,7 @@ div.edit-contact-container
 		hr
 		div.row
 			h1.title.is-4 Custom fields
-		div.row-split(v-for="field in form.customFields")
+		div.row-split(v-for="field in customFields")
 			CustomField(:field="field" @update="updateCustomField")
 
 		div.row-split
@@ -150,8 +179,7 @@ div.edit-contact-container
 	div.contact-form(v-else)
 		div.row.label Name
 		div.row
-			h1.title.is-4 {{ contact.firstname }} {{ contact.lastname }}
-
+			h1.title.is-4 {{ form.firstname }} {{ form.lastname }}
 		hr
 
 		template(v-if="phoneFields.length > 0")
@@ -161,7 +189,6 @@ div.edit-contact-container
 				div.row.label {{ field.fieldName }}
 				div.row
 					h1.title.is-5 {{ field.fieldValue }}
-
 			hr
 
 		template(v-if="emailFields.length > 0")
@@ -171,17 +198,15 @@ div.edit-contact-container
 				div.row.label {{ field.fieldName }}
 				div.row
 					h1.title.is-5 {{ field.fieldValue }}
-
 			hr
 
 		template(v-if="customFields.length > 0")
 			div.row
-				h1.title.is-5 Email
+				h1.title.is-5 Custom fields
 			div(v-for="field in customFields")
 				div.row.label {{ field.fieldName }}
 				div.row
 					h1.title.is-5 {{ field.fieldValue }}
-
 			hr
 
 	div.button-bar
@@ -192,9 +217,9 @@ div.edit-contact-container
 				Icon(icon="mdi:trash" height="22")
 				BModal(v-if="deleteModal")
 					template(v-slot:header)
-						p.modal-card-title Delete
+						p.modal-card-title Delete {{ form.firstname }}?
 					template(v-slot:content)
-						span Are you sure you want to delete {{ props.contact.firstname }}'s contact?
+						span Are you sure you want to delete {{ form.firstname }}'s contact?
 					template(v-slot:footer)
 						BButton(:type="BloomaTypes.Danger" @click="deleteContact") Delete
 						BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel

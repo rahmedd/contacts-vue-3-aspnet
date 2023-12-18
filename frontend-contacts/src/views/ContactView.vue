@@ -15,7 +15,7 @@ import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
 import type BaseReponse from '@/responseTypes/BaseResponse';
-import { useGetContact } from '@/composables/ContactMethods';
+import { useContact } from '@/composables/ContactMethods';
 
 const authStore = useAuthStore()
 
@@ -35,8 +35,8 @@ const {
 const {
 	data: contact,
 	state: contactState,
-	update: getContact,
-} = useGetContact()
+	get: getContact,
+} = useContact()
 
 // const contacts = ref<ContactResponse[]>([])
 const selected = ref<number>(0) // id
@@ -80,7 +80,12 @@ div.contact-container
 		div.contact-select-container.scrollable
 			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" :mode="viewMode" @update="selectContact")
 		div.contact-view-container.scrollable
-			EditContact(v-if="contact" :key="contact.id" :contact="contact" @mode="updateMode")
+			EditContact(
+				v-if="contact"
+				:key="contact.id"
+				:contact="contact"
+				@mode="updateMode"
+			)
 			h1(v-else)
 			//- h1(v-else) Select a contact
 </template>
