@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import apiClient from '@/services/axios'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
-import { useContact } from '@/composables/ContactMethods'
+import { useUpdateContact } from '@/composables/ContactMethods'
 
 // blooma
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
@@ -13,10 +13,7 @@ import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 
 // types
-import type BaseReponse from '@/responseTypes/BaseResponse'
-import type User from '@/responseTypes/User'
 import { ContactResponse } from '@/responseTypes/ContactResponse'
-import { Contact } from '@/requestTypes/Contact'
 import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
 import { ContactCustomFieldTypes } from '@/enums/ContactCustomFieldTypes'
 import { EditContactModes } from '@/enums/EditContactModes'
@@ -38,12 +35,17 @@ const props = defineProps({
 })
 
 const emits = defineEmits<{
-	update: [id: number],
+	updateId: [id: number],
+	updateContact: [ct: ContactResponse],
 	mode: [mode: EditContactModes],
 }>()
 
 const form = reactive(
-	new ContactResponse(props.contact.id, props.contact.firstname, props.contact.lastname, props.contact.customFields.map(f => { return { ...f } } ))
+	new ContactResponse(
+		props.contact.id,
+		props.contact.firstname,
+		props.contact.lastname,
+		props.contact.customFields.map(f => { return { ...f } } ))
 )
 
 //- vuelidate inject subform
@@ -55,16 +57,15 @@ const rules = {
 
 const v$ = useVuelidate(rules, form)
 
-// const {
-// 	update: updateContact,
-// 	state: contactState,
-// } = useContact()
+const {
+	update: updateContact,
+} = useUpdateContact()
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
 
 function selectContact(id: number) {
-	emits('update', id)
+	emits('updateId', id)
 }
 
 async function saveContact() {
@@ -74,7 +75,10 @@ async function saveContact() {
 	}
 
 	try {
-		// const updateRes = await updateContact(form)
+		const updateRes = await updateContact(form)
+		if (updateRes) {
+			emits('updateContact', updateRes)
+		}
 		
 	}
 	catch (ex) {

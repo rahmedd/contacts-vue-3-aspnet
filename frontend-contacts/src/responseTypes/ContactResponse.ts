@@ -1,14 +1,16 @@
 import { Contact } from "@/requestTypes/Contact";
-import type { ContactCustomField } from "@/requestTypes/ContactCustomField";
+import { ContactCustomFieldResponse } from "@/responseTypes/ContactCustomFIeldResponse";
 
-export class ContactResponse extends Contact {
+export class ContactResponse implements Contact {
 	id: number
+	firstname: string
+	lastname: string
+	customFields: ContactCustomFieldResponse[]
 
-	constructor(id: number, firstname: string, lastname: string, customFields: ContactCustomField[]) {
-		super(firstname, lastname, customFields)
+	constructor(id: number, firstname: string, lastname: string, customFields: ContactCustomFieldResponse[]) {
+		this.firstname = firstname
+		this.lastname = lastname
+		this.customFields = customFields
 		this.id = id
 	}
 }
-
-// const x = new ContactResponse(1, 'a', 'a', [])
-// x.id = 

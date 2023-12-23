@@ -51,7 +51,7 @@ const fieldTypes = Object.keys(ContactCustomFieldTypes).filter((v) => isNaN(Numb
 </script>
 
 <template lang="pug">
-div.field-row(@input="updateField")
+div.field-row(@change="updateField")
 	div.field
 		BInput(
 			placeholder="Label"

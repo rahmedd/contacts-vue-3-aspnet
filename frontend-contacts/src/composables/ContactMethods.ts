@@ -5,9 +5,14 @@ import { ContactResponse } from '@/responseTypes/ContactResponse'
 import { ComposeResultState } from '@/enums/ComposeResultState'
 import type BaseReponse from '@/responseTypes/BaseResponse'
 import type { AxiosResponse } from 'axios'
-import { ContactCustomField } from '@/requestTypes/ContactCustomField'
+import { ContactCustomFieldResponse } from "@/responseTypes/ContactCustomFIeldResponse";
 
-export function useGetContact(): ComposeResult<ContactResponse | null, number> {
+export function useGetContact():
+ComposeResult<
+	ContactResponse | null,
+	number,
+	void
+> {
 	const contact = ref<ContactResponse | null>(null)
 	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
 	const error = ref<any | null>(null)
@@ -34,16 +39,52 @@ export function useGetContact(): ComposeResult<ContactResponse | null, number> {
 	}
 }
 
+export function useUpdateContact():
+ComposeResult<
+	ContactResponse | null,
+	ContactResponse,
+	ContactResponse | null
+> {
+	const contact = ref<ContactResponse | null>(null)
+	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
+	const error = ref<any | null>(null)
+
+	async function update(ct: ContactResponse) {
+		try {
+			state.value = ComposeResultState.LOADING
+
+			const res: AxiosResponse<BaseReponse<ContactResponse>> = await axios.put(`Contact`, ct)
+			contact.value = contactToContactInternal(res.data.body)
+
+			state.value = ComposeResultState.SUCCESS
+
+			return res.data.body
+		}
+		catch (ex) {
+			console.log(ex)
+			state.value = ComposeResultState.FAILURE
+		}
+
+		return null
+	}
+
+	return {
+		state: state,
+		data: contact,
+		update: update,
+	}
+}
+
 // adds internal id used for tracking custom fields in vee-validate
-export function contactToContactInternal(contact: ContactResponse): ContactResponse {
-	const c = new ContactResponse(
-		contact.id,
-		contact.firstname,
-		contact.lastname,
-		contact.customFields.map(c => new ContactCustomField(c.fieldName, c.fieldValue, c.fieldType)),
+export function contactToContactInternal(ct: ContactResponse): ContactResponse {
+	const contact = new ContactResponse(
+		ct.id,
+		ct.firstname,
+		ct.lastname,
+		ct.customFields.map(c => new ContactCustomFieldResponse(c.id, c.fieldName, c.fieldValue, c.fieldType)),
 	)
 
-	return c
+	return contact
 }
 
 export function contactInternalToContact() {

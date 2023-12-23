@@ -6,8 +6,8 @@ import type { Ref } from "vue";
 // type StringGetter<T extends number> = (...args: T[]) => Promise<T>;
 
 
-export interface ComposeResult<T1, T2> {
+export interface ComposeResult<T1, T2, T3> {
 	state: Ref<ComposeResultState>
 	data: Ref<T1>
-	update: (...args: T2[]) => Promise<void>
+	update: (...args: T2[]) => Promise<T3>
 }
