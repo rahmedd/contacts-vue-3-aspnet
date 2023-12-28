@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type PropType } from 'vue';
+import { type PropType, computed } from 'vue';
+import { klona } from 'klona/json'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { EditContactModes } from '@/enums/EditContactModes';
 import { ContactResponse } from '@/responseTypes/ContactResponse';
@@ -30,11 +31,18 @@ function selectContact(id: number) {
 	// selected.value = id
 }
 
+const sortedContacts = computed(() => {
+	const contactsClone = klona(props.contacts)
+	contactsClone.sort((a, b) => a.firstname.normalize().localeCompare(b.firstname.normalize()))
+
+	return contactsClone
+})
+
 </script>
 
 <template lang="pug">
 div
-	div(v-for="contact in contacts")
+	div(v-for="contact in sortedContacts")
 		BButton(
 			:type="BloomaTypes.Primary"
 			:light="contact.id !== selected"
