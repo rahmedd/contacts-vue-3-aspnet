@@ -115,7 +115,7 @@ public class AuthController : ControllerBase
 			// redirect response value.
 			IsPersistent = true,
 			AllowRefresh = true,
-			ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60),
+			ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60 * 24),
 		};
 
 		await HttpContext.SignInAsync(

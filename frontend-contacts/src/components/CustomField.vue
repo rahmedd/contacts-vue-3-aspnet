@@ -48,39 +48,60 @@ const fieldTypes = Object.keys(ContactCustomFieldTypes).filter((v) => isNaN(Numb
 // 	[ContactCustomFieldTypes.TSTRING]: 'Text',
 // }
 
+function updateFieldName(evt: Event) {
+	const val = (evt.target as HTMLInputElement).value
+	form.fieldName = val
+	updateField()
+}
+
+function updateFieldValue(evt: Event) {
+	const val = (evt.target as HTMLInputElement).value
+	form.fieldValue = val
+	updateField()
+}
+
+function updateFieldType(evt: Event) {
+	const val = (evt.target as HTMLInputElement).value
+	form.fieldType = val
+	updateField()
+}
+
 </script>
 
 <template lang="pug">
-div.field-row(@change="updateField")
+div.field-row
 	div.field
 		BInput(
 			placeholder="Label"
 			name="fieldname"
-			v-model="form.fieldName"
 			:debounce="250"
 			:showLabel="true"
 			:val$="v$.fieldName"
+			:modelValue="form.fieldName"
+			@input="updateFieldName"
 		)
 	div.field
 		BInput(
 			placeholder="Value"
 			name="fieldvalue"
-			v-model="form.fieldValue"
 			:debounce="250"
 			:showLabel="true"
 			:val$="v$.fieldValue"
 			:date="form.fieldType === ContactCustomFieldTypes.DATE"
+			:modelValue="form.fieldValue"
+			@input="updateFieldValue"
 		)
 	div.field(v-if="!simple")
 		BSelect.field-is-small(
 			placeholder="Type"
 			name="fieldtype"
-			v-model="form.fieldType"
 			:mode="BloomaValidationModes.Aggressive"
 			:debounce="250"
 			:showLabel="true"
 			:val$="v$.fieldType"
 			:list="ContactCustomFieldTypes"
+			:modelValue="form.fieldType"
+			@input="updateFieldType"
 		)
 
 </template>
