@@ -2,7 +2,7 @@
 import { computed, watch, ref, inject, type PropType} from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { Icon } from '@iconify/vue'
-import { BFormStateKey, FormLoadingKey } from '@/blooma/symbols'
+import { FormLoadingKey } from '@/blooma/symbols'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
