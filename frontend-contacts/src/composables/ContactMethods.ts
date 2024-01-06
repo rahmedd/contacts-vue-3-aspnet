@@ -1,6 +1,7 @@
 import axios from '@/services/axios'
 import { ref } from 'vue'
 import type { ComposeResult } from '@/composables/ComposeResult'
+import { Contact } from '@/requestTypes/Contact'
 import { ContactResponse } from '@/responseTypes/ContactResponse'
 import { ComposeResultState } from '@/enums/ComposeResultState'
 import type BaseReponse from '@/responseTypes/BaseResponse'
@@ -41,19 +42,55 @@ ComposeResult<
 
 export function useUpdateContact():
 ComposeResult<
-	ContactResponse | null,
-	ContactResponse,
-	ContactResponse | null
+	Contact | null,
+	Contact,
+	Contact | null
 > {
-	const contact = ref<ContactResponse | null>(null)
+	const contact = ref<Contact | null>(null)
 	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
 	const error = ref<any | null>(null)
 
-	async function update(ct: ContactResponse) {
+	async function update(ct: Contact) {
 		try {
 			state.value = ComposeResultState.LOADING
 
 			const res: AxiosResponse<BaseReponse<ContactResponse>> = await axios.put(`Contact`, ct)
+			contact.value = contactToContactInternal(res.data.body)
+
+			state.value = ComposeResultState.SUCCESS
+
+			return res.data.body
+		}
+		catch (ex) {
+			console.log(ex)
+			state.value = ComposeResultState.FAILURE
+		}
+
+		return null
+	}
+
+	return {
+		state: state,
+		data: contact,
+		update: update,
+	}
+}
+
+export function useCreateContact():
+ComposeResult<
+	Contact | null,
+	Contact,
+	Contact | null
+> {
+	const contact = ref<Contact | null>(null)
+	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
+	const error = ref<any | null>(null)
+
+	async function update(ct: Contact) {
+		try {
+			state.value = ComposeResultState.LOADING
+
+			const res: AxiosResponse<BaseReponse<ContactResponse>> = await axios.put(`Contact`)
 			contact.value = contactToContactInternal(res.data.body)
 
 			state.value = ComposeResultState.SUCCESS

@@ -13,8 +13,9 @@ import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 
 // types
+import { Contact } from '@/requestTypes/Contact'
 import { ContactResponse } from '@/responseTypes/ContactResponse'
-import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
+import { ContactCustomField } from '@/requestTypes/ContactCustomField'
 import { ContactCustomFieldTypes } from '@/enums/ContactCustomFieldTypes'
 import { EditContactModes } from '@/enums/EditContactModes'
 
@@ -36,16 +37,17 @@ const props = defineProps({
 
 const emits = defineEmits<{
 	updateId: [id: number],
-	updateContact: [ct: ContactResponse],
+	// updateContact: [ct: ContactResponse],
 	mode: [mode: EditContactModes],
 }>()
 
 const form = reactive(
-	new ContactResponse(
+	new Contact(
 		props.contact.id,
 		props.contact.firstname,
 		props.contact.lastname,
-		props.contact.customFields.map(f => { return { ...f } } ))
+		props.contact.customFields.map(f => { return { ...f } } )),
+		// props.contact.customFields.map(f => new ContactCustomField(f.fieldName, f.fieldValue, f.fieldType))
 )
 
 //- vuelidate inject subform
@@ -57,9 +59,7 @@ const rules = {
 
 const v$ = useVuelidate(rules, form)
 
-const {
-	update: updateContact,
-} = useUpdateContact()
+const { update: updateContact } = useUpdateContact()
 
 const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
@@ -73,13 +73,12 @@ async function saveContact() {
 	if (!res) {
 		return
 	}
-
+ 
 	try {
 		const updateRes = await updateContact(form)
 		if (updateRes) {
-			emits('updateContact', updateRes)
+			// emits('updateContact', updateRes)
 		}
-		
 	}
 	catch (ex) {
 		console.log('saveContact error')
@@ -105,6 +104,21 @@ async function edited() {
 
 function toggleDeleteModal() {
 	deleteModal.value = !deleteModal.value
+}
+
+function createCustomField(fieldType: ContactCustomFieldTypes) {
+	const duplicate = form.customFields.find(f => (f.fieldType === fieldType) && !(f.fieldName || f.fieldValue))
+	if (duplicate) {
+		return
+	}
+
+	form.customFields.push(
+		new ContactCustomField(
+			'',
+			'',
+			fieldType,
+		)
+	)
 }
 
 function updateCustomField(field: ContactCustomField) {
@@ -152,7 +166,7 @@ div.edit-contact-container
 			//- vuelidate subform
 			CustomField(:field="field" @update="updateCustomField" :simple="true")
 		div.row
-			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.PHONE)")
 				b New phone
 				Icon(icon="ci:add-row" height="24")
 
@@ -162,7 +176,7 @@ div.edit-contact-container
 		div.row-split(v-for="field in emailFields")
 			CustomField(:field="field" @update="updateCustomField" :simple="true")
 		div.row
-			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="deleteContact")
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.EMAIL)")
 				b New email
 				Icon(icon="ci:add-row" height="24")
 
@@ -177,7 +191,7 @@ div.edit-contact-container
 			CustomField(:field="field" @update="updateCustomField")
 
 		div.row-split
-			BButton.add-field(:type="BloomaTypes.Primary" :light="true")
+			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.TEXT)")
 				b New custom field
 				Icon(icon="ci:add-row" height="24")
 	div.contact-form(v-else)
