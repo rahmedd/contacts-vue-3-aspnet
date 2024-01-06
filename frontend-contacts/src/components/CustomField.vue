@@ -60,9 +60,9 @@ function updateFieldValue(evt: Event) {
 	updateField()
 }
 
-function updateFieldType(evt: Event) {
-	const val = (evt.target as HTMLInputElement).value
-	form.fieldType = val
+function updateFieldType(evt: ContactCustomFieldTypes) {
+	// const val = (evt.target as HTMLInputElement).value
+	form.fieldType = evt
 	updateField()
 }
 
@@ -101,7 +101,7 @@ div.field-row
 			:val$="v$.fieldType"
 			:list="ContactCustomFieldTypes"
 			:modelValue="form.fieldType"
-			@input="updateFieldType"
+			@update:modelValue="updateFieldType"
 		)
 
 </template>
