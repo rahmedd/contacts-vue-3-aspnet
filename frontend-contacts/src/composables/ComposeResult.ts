@@ -9,5 +9,5 @@ import type { Ref } from "vue";
 export interface ComposeResult<T1, T2, T3> {
 	state: Ref<ComposeResultState>
 	data: Ref<T1>
-	update: (...args: T2[]) => Promise<T3>
+	action: (...args: T2[]) => Promise<T3>
 }

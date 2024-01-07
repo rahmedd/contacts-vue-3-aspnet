@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import apiClient from '@/services/axios'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
-import { useUpdateContact } from '@/composables/ContactMethods'
+import { useCreateContact, useUpdateContact } from '@/composables/ContactMethods'
 
 // blooma
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
@@ -30,14 +30,17 @@ import CustomField from '@/components/CustomField.vue'
 
 const props = defineProps({
 	contact: {
-		type: Object as PropType<ContactResponse>,
+		type: Object as PropType<Contact>,
+		required: true,
+	},
+	mode: {
+		type: Number as PropType<EditContactModes>,
 		required: true,
 	},
 })
 
 const emits = defineEmits<{
 	updateId: [id: number],
-	// updateContact: [ct: ContactResponse],
 	mode: [mode: EditContactModes],
 }>()
 
@@ -56,16 +59,15 @@ const rules = {
 	firstname: { isRequired, },
 	lastname: { isRequired, },
 }
-
 const v$ = useVuelidate(rules, form)
 
-const { update: updateContact } = useUpdateContact()
-
-const mode = ref<EditContactModes>(EditContactModes.VIEW)
 const deleteModal = ref<boolean>(false)
 
-function selectContact(id: number) {
-	emits('updateId', id)
+const { action: updateContact } = useUpdateContact()
+const { action: createContact } = useCreateContact()
+
+function updateMode(mode: EditContactModes) {
+	emits('mode', mode)
 }
 
 async function saveContact() {
@@ -75,31 +77,32 @@ async function saveContact() {
 	}
  
 	try {
-		const updateRes = await updateContact(form)
-		if (updateRes) {
-			// emits('updateContact', updateRes)
+		// creating a newcontact
+		if (props.contact.id === 0) {
+			const createRes = await createContact(form)
+		}
+		// updating a contact
+		else {
+			const updateRes = await updateContact(form)
+			if (updateRes) {
+				// emits('updateContact', updateRes)
+			}
 		}
 	}
 	catch (ex) {
 		console.log('saveContact error')
 	}
 
-	mode.value = EditContactModes.VIEW
-	emits('mode', mode.value)
+	updateMode(EditContactModes.VIEW)
 }
 
-async function editContact() {
-	mode.value = EditContactModes.EDIT
-	emits('mode', mode.value)
+function editContact() {
+	updateMode(EditContactModes.EDIT)
 }
 
 async function deleteContact(id: number) {
 	// action
 	deleteModal.value = false
-}
-
-async function edited() {
-	await editContact()
 }
 
 function toggleDeleteModal() {
@@ -144,15 +147,11 @@ const customFields = computed(() =>
 )
 const emailFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.EMAIL))
 const phoneFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.PHONE))
-
-onMounted(() => {
-	emits('mode', mode.value)
-})
 </script>
 
 <template lang="pug">
 div.edit-contact-container
-	BForm.contact-form(v-if="mode === EditContactModes.EDIT" @input="edited" :loading="false")
+	BForm.contact-form(v-if="mode === EditContactModes.EDIT" @input="editContact" :loading="false")
 		div.row
 			h1.title.is-4 Name
 		div.row-split
@@ -180,10 +179,6 @@ div.edit-contact-container
 				b New email
 				Icon(icon="ci:add-row" height="24")
 
-		//- div.row-split
-		//- 	h1.title.is-3 Phone
-		//- div.row-split(v-for="field in emailFields")
-		//- 	BInput(placeholder='Phone' name='phone' v-model='field.fieldValue' :mode="BloomaValidationModes.Aggressive" :val$="v$.lastname" :debounce="250")
 		hr
 		div.row
 			h1.title.is-4 Custom fields
@@ -194,6 +189,7 @@ div.edit-contact-container
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.TEXT)")
 				b New custom field
 				Icon(icon="ci:add-row" height="24")
+
 	div.contact-form(v-else)
 		div.row.label Name
 		div.row

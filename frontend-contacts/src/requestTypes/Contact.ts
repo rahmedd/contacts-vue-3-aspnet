@@ -1,7 +1,7 @@
 import type { ContactCustomField } from '@/requestTypes/ContactCustomField';
 
 export class Contact {
-	public id?: number
+	public id: number
 	public firstname: string
 	public lastname: string
 	public customFields: ContactCustomField[]

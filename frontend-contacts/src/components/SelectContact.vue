@@ -17,7 +17,7 @@ const props = defineProps({
 		required: true,
 	},
 	mode: {
-		type: Object as PropType<EditContactModes>,
+		type: Number as PropType<EditContactModes>,
 		// required: true,
 	},
 })

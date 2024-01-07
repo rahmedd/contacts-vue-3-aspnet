@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+// lib
+import { ref } from 'vue';
+import apiClient from '@/services/axios';
 import { useAuthStore } from '@/stores/auth'
+import { useGetContact } from '@/composables/ContactMethods';
+import { useAxios } from '@vueuse/integrations/useAxios'
+
+// blooma
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
-import { Contact } from '@/requestTypes/Contact'
-import { ContactResponse } from '@/responseTypes/ContactResponse';
-import { useAxios } from '@vueuse/integrations/useAxios'
-import type User from '@/responseTypes/User';
+
+// types
 import { EditContactModes } from '@/enums/EditContactModes';
-import apiClient from '@/services/axios';
+import { ContactResponse } from '@/responseTypes/ContactResponse';
+import type BaseReponse from '@/responseTypes/BaseResponse';
+import { Contact } from '@/requestTypes/Contact'
+
+// components
 import BButton from '@/blooma/BButton.vue'
 import BInput from '@/blooma/BInput.vue'
 import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
-import type BaseReponse from '@/responseTypes/BaseResponse';
-import { useGetContact } from '@/composables/ContactMethods';
+
 
 const authStore = useAuthStore()
 
@@ -25,22 +32,19 @@ const {
 	isFinished: isFinished,
 } = useAxios<BaseReponse<ContactResponse[]>>('Contact', { method: 'GET' }, apiClient, { immediate: true })
 
-// const {
-// 	data: contact,
-// 	isLoading: contactIsLoading,
-// 	isFinished: contactisFinished,
-// 	execute: getContact,
-// } = useAxios<BaseReponse<ContactResponse>>(`Contact/0`, { method: 'GET' }, apiClient, { immediate: false })
-
 const {
 	data: contact,
 	state: contactState,
-	update: getContact,
+	action: getContact,
 } = useGetContact()
 
 // const contacts = ref<ContactResponse[]>([])
 const selected = ref<number>(0) // id
-const viewMode = ref<EditContactModes>()
+const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
+
+function updateMode(mode: EditContactModes) {
+	viewMode.value = mode
+}
 
 async function selectContact(id: number) {
 	if (viewMode.value === EditContactModes.EDIT) {
@@ -60,8 +64,9 @@ async function selectContact(id: number) {
 	}
 }
 
-function updateMode(mode: EditContactModes) {
-	viewMode.value = mode
+function createContact() {
+	contact.value = new Contact(0, '', '', [])
+	updateMode(EditContactModes.EDIT)
 }
 
 </script>
@@ -70,7 +75,7 @@ function updateMode(mode: EditContactModes) {
 div.contact-container
 	div.contact-layout
 		div.new-container
-			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="") +
+			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="createContact") +
 		div.search-container
 			BInput(placeholder='Search' name='search' :mode="BloomaValidationModes.Aggressive" :showLabel="false" :debounce="250")
 		div.end-nav-container
@@ -80,7 +85,7 @@ div.contact-container
 		div.contact-select-container.scrollable
 			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" :mode="viewMode" @update="selectContact")
 		div.contact-view-container.scrollable
-			EditContact(v-if="contact" :key="contact.id" :contact="contact" @mode="updateMode")
+			EditContact(v-if="contact" :key="contact.id" :contact="contact" :mode="viewMode" @mode="updateMode")
 			h1(v-else)
 			//- h1(v-else) Select a contact
 </template>
