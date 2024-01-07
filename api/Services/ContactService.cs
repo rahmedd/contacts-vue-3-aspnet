@@ -95,21 +95,24 @@ public class ContactService
 		return contactRes;
 	}
 
-	public async Task<List<ContactDto>> GetContactsAsync(User user)
+	public async Task<List<ContactsGetDto>> GetContactsAsync(User user)
 	{
 		var contactsQuery = _context.Contacts
 			.Where(c => c.Users
 				.Any(u => u.Id == user.Id)
 			)
-			.Include(c => c.Users)
-			.Include(c => c.CustomFields);
+			.Select(x => 
+				new ContactsGetDto
+				{
+					Id = x.Id,
+					Firstname = x.Firstname,
+					Lastname = x.Lastname
+				}
+			);
 
 		var contacts = await contactsQuery.ToListAsync();
 
-
-		List<ContactDto> contactsToDto = _mapper.Map<List<ContactDto>>(contacts);
-
-		return contactsToDto;
+		return contacts;
 	}
 
 	private async Task<Contact> GetContactAsync(User user, int contactId)

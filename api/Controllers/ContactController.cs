@@ -27,13 +27,13 @@ public class ContactController : ControllerBase
     // GET: api/<ContactsController>
     [Authorize]
     [HttpGet]
-	public async Task<ActionResult<BaseResponse<IEnumerable<ContactDto>>>> Get()
+	public async Task<ActionResult<BaseResponse<IEnumerable<ContactsGetDto>>>> Get()
 	{
         //return await _context.Contacts.ToListAsync();
         User user = await _userService.GetUserByUsernameAsync(LoggedInUser);
-		List<ContactDto> contacts = await _contactService.GetContactsAsync(user);
+		List<ContactsGetDto> contacts = await _contactService.GetContactsAsync(user);
 		
-		var res = new BaseResponse<IEnumerable<ContactDto>>() { Body = contacts };
+		var res = new BaseResponse<IEnumerable<ContactsGetDto>>() { Body = contacts };
 
         return res;
 	}
