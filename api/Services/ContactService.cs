@@ -108,7 +108,8 @@ public class ContactService
 					Firstname = x.Firstname,
 					Lastname = x.Lastname
 				}
-			);
+			)
+			.OrderBy(c => c.Firstname);
 
 		var contacts = await contactsQuery.ToListAsync();
 
