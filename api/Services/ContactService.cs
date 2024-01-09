@@ -116,6 +116,28 @@ public class ContactService
 		return contacts;
 	}
 
+	public async Task<List<ContactsGetDto>> SearchContactsAsync(User user, String searchQuery)
+	{
+		var contactsQuery = _context.Contacts
+			.Where(c => c.Users
+				.Any(u => u.Id == user.Id)
+			)
+            .Where(c => (c.Firstname + " " + c.Lastname).Contains(searchQuery))
+			.Select(x =>
+				new ContactsGetDto
+				{
+					Id = x.Id,
+					Firstname = x.Firstname,
+					Lastname = x.Lastname
+				}
+			)
+			.OrderBy(c => c.Firstname);
+
+		var contacts = await contactsQuery.ToListAsync();
+
+		return contacts;
+	}
+
 	private async Task<Contact> GetContactAsync(User user, int contactId)
 	{
 		var contactsQuery = _context.Contacts
