@@ -5,6 +5,7 @@ using api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace api.Controllers;
 
@@ -24,22 +25,29 @@ public class ContactController : ControllerBase
 		_userService = userService;
     }
 
-    // GET: api/<ContactsController>
-    [Authorize]
-    [HttpGet]
-	public async Task<ActionResult<BaseResponse<IEnumerable<ContactsGetDto>>>> Get()
+	// GET: api/<ContactsController>/?searchQuery=name
+	[Authorize]
+	[HttpGet]
+	public async Task<ActionResult<BaseResponse<IEnumerable<ContactsGetDto>>>> Get(String? searchQuery)
 	{
-        //return await _context.Contacts.ToListAsync();
-        User user = await _userService.GetUserByUsernameAsync(LoggedInUser);
-		List<ContactsGetDto> contacts = await _contactService.GetContactsAsync(user);
-		
-		var res = new BaseResponse<IEnumerable<ContactsGetDto>>() { Body = contacts };
+		User user = await _userService.GetUserByUsernameAsync(LoggedInUser);
+		List<ContactsGetDto> contacts = new List<ContactsGetDto>();
 
-        return res;
+		if (searchQuery == null)
+		{
+			contacts = await _contactService.GetContactsAsync(user);
+		}
+		else
+		{
+			contacts = await _contactService.SearchContactsAsync(user, searchQuery);
+		}
+
+		var res = new BaseResponse<IEnumerable<ContactsGetDto>>() { Body = contacts };
+		return res;
 	}
 
-    // GET api/<ContactsController>/5
-    [Authorize]
+	// GET api/<ContactsController>/5
+	[Authorize]
     [HttpGet("{id}")]
 	public async Task<ActionResult<BaseResponse<ContactDto>>> Get(int id)
 	{
