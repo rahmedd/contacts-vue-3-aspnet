@@ -1,10 +1,8 @@
 <script setup lang="ts">
 // lib
-import { ref } from 'vue';
-import apiClient from '@/services/axios';
+import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth'
-import { useGetContact } from '@/composables/ContactMethods';
-import { useAxios } from '@vueuse/integrations/useAxios'
+import { useGetContact, useGetContacts } from '@/composables/ContactMethods';
 
 // blooma
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
@@ -12,9 +10,8 @@ import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 
 // types
 import { EditContactModes } from '@/enums/EditContactModes';
-import { ContactResponse } from '@/responseTypes/ContactResponse';
-import type BaseReponse from '@/responseTypes/BaseResponse';
 import { Contact } from '@/requestTypes/Contact'
+import { ComposeResultState } from '@/enums/ComposeResultState'
 
 // components
 import BButton from '@/blooma/BButton.vue'
@@ -23,14 +20,13 @@ import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
 
-
 const authStore = useAuthStore()
 
-const {
+const { 
 	data: contacts,
-	isLoading: isLoading,
-	isFinished: isFinished,
-} = useAxios<BaseReponse<ContactResponse[]>>('Contact', { method: 'GET' }, apiClient, { immediate: true })
+	state: contactsState,
+	action: getContacts
+ } = useGetContacts()
 
 const {
 	data: contact,
@@ -41,6 +37,7 @@ const {
 // const contacts = ref<ContactResponse[]>([])
 const selected = ref<number>(0) // id
 const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
+const searchQuery = ref<string>('')
 
 function updateMode(mode: EditContactModes) {
 	viewMode.value = mode
@@ -69,6 +66,14 @@ function createContact() {
 	updateMode(EditContactModes.EDIT)
 }
 
+async function searchContacts() {
+	await getContacts(searchQuery.value)
+}
+
+onMounted(async () => {
+	await getContacts()
+})
+
 </script>
 
 <template lang="pug">
@@ -77,15 +82,37 @@ div.contact-container
 		div.new-container
 			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="createContact") +
 		div.search-container
-			BInput(placeholder='Search' name='search' :mode="BloomaValidationModes.Aggressive" :showLabel="false" :debounce="250")
+			BInput(
+				placeholder='Search'
+				name='search'
+				v-model="searchQuery"
+				@update:modelValue="searchContacts"
+				:mode="BloomaValidationModes.Aggressive"
+				:showLabel="false"
+				:debounce="250"
+			)
 		div.end-nav-container
 			//- p hello3
 		div.alphabet-container.scrollable
-			Alphabet
+			Alphabet(
+				v-model="searchQuery"
+				@update:modelValue="searchContacts"
+			)
 		div.contact-select-container.scrollable
-			SelectContact(v-if="contacts" :contacts="contacts?.body" :selected="selected" :mode="viewMode" @update="selectContact")
+			SelectContact(
+				:contacts="contacts"
+				:selected="selected"
+				:mode="viewMode"
+				@update="selectContact"
+			)
 		div.contact-view-container.scrollable
-			EditContact(v-if="contact" :key="contact.id" :contact="contact" :mode="viewMode" @mode="updateMode")
+			EditContact(
+				v-if="contact"
+				:key="contact.id"
+				:contact="contact"
+				:mode="viewMode"
+				@mode="updateMode"
+			)
 			h1(v-else)
 			//- h1(v-else) Select a contact
 </template>

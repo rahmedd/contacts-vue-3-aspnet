@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import axios from '@/services/axios'
+import apiClient from '@/services/axios'
 
 import type { ComposeResult } from '@/composables/ComposeResult'
 import type { AxiosResponse } from 'axios'
@@ -8,6 +8,43 @@ import type BaseReponse from '@/responseTypes/BaseResponse'
 import { ContactCustomFieldResponse } from "@/responseTypes/ContactCustomFIeldResponse";
 import { Contact } from '@/requestTypes/Contact'
 import { ComposeResultState } from '@/enums/ComposeResultState'
+
+export function useGetContacts():
+ComposeResult<
+	Contact[],
+	string,
+	void
+> {
+	const contact = ref<Contact[]>([])
+	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
+	const error = ref<any | null>(null)
+
+	async function getContacts(searchQuery: string = '') {
+		try {
+			state.value = ComposeResultState.LOADING
+
+			const res: AxiosResponse<BaseReponse<Contact[]>> = await apiClient.get(`Contact`, {
+				params: {
+					searchQuery: searchQuery?.trim()
+				}
+			})
+
+			contact.value = res.data.body
+
+			state.value = ComposeResultState.SUCCESS
+		}
+		catch (ex) {
+			console.log(ex)
+			state.value = ComposeResultState.FAILURE
+		}
+	}
+
+	return {
+		state: state,
+		data: contact,
+		action: getContacts,
+	}
+}
 
 export function useGetContact():
 ComposeResult<
@@ -23,7 +60,7 @@ ComposeResult<
 		try {
 			state.value = ComposeResultState.LOADING
 
-			const res: AxiosResponse<BaseReponse<Contact>> = await axios.get(`Contact/${id}`)
+			const res: AxiosResponse<BaseReponse<Contact>> = await apiClient.get(`Contact/${id}`)
 			contact.value = res.data.body
 
 			state.value = ComposeResultState.SUCCESS
@@ -55,7 +92,7 @@ ComposeResult<
 		try {
 			state.value = ComposeResultState.LOADING
 
-			const res: AxiosResponse<BaseReponse<ContactResponse>> = await axios.put(`Contact`, ct)
+			const res: AxiosResponse<BaseReponse<ContactResponse>> = await apiClient.put(`Contact`, ct)
 			contact.value = contactToContactInternal(res.data.body)
 
 			state.value = ComposeResultState.SUCCESS
@@ -90,7 +127,7 @@ ComposeResult<
 		try {
 			state.value = ComposeResultState.LOADING
 
-			const res: AxiosResponse<BaseReponse<ContactResponse>> = await axios.post(`Contact`, ct)
+			const res: AxiosResponse<BaseReponse<ContactResponse>> = await apiClient.post(`Contact`, ct)
 			contact.value = contactToContactInternal(res.data.body)
 
 			state.value = ComposeResultState.SUCCESS

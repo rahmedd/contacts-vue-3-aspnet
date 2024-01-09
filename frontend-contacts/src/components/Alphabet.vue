@@ -1,24 +1,57 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
+
+import { AlphabetModes } from '@/enums/AlphabetModes'
+
 import BButton from '@/blooma/BButton.vue'
 
-const props = defineProps()
+const props = defineProps({})
+const emits = defineEmits(['update:modelValue'])
 
+const alphaMode = ref<AlphabetModes>(AlphabetModes.ALL)
 const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
-const letters = ref<string[]>(['all', ...alphabet])
-const selected = ref(letters.value[0])
+const letters = ref<string[]>([...alphabet])
+const selectedLetter = ref(letters.value[0])
+
+function updateParent() {
+	// if all is selected update parent state with empty string
+	if (alphaMode.value === AlphabetModes.ALL) {
+		emits('update:modelValue', '')
+	}
+	else {
+		emits('update:modelValue', selectedLetter.value)
+	}
+}
+
+function selectLetter(letter: string) {
+	alphaMode.value = AlphabetModes.ALPHA
+	selectedLetter.value = letter
+	updateParent()
+}
+
+function selectAll() {
+	alphaMode.value = AlphabetModes.ALL
+	updateParent()
+}
 
 </script>
 
 <template lang="pug">
 div
+	div.letter
+		BButton(
+			:type="BloomaTypes.Primary"
+			:light="alphaMode === AlphabetModes.ALPHA"
+			@click="() => selectAll()"
+		) all
 	div.letter(v-for="(letter, index) in letters" :class="{ odd: index % 2 }")
 		BButton(
 			:type="BloomaTypes.Primary"
-			:light="letter !== selected"
-			@click="() => selected = letter"
+			:light="!(letter === selectedLetter && alphaMode === AlphabetModes.ALPHA)"
+			@click="() => selectLetter(letter)"
 		) {{ letter }}
 </template>
 
