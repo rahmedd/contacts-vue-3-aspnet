@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { type PropType, computed } from 'vue';
 import { klona } from 'klona/json'
+
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { EditContactModes } from '@/enums/EditContactModes';
-import { ContactResponse } from '@/responseTypes/ContactResponse';
-import BButton from '@/blooma/BButton.vue'
 
+import type { Contact } from '@/requestTypes/Contact';
+
+import BButton from '@/blooma/BButton.vue'
 
 const props = defineProps({
 	contacts: {
-		type: Array as PropType<ContactResponse[]>,
+		type: Array as PropType<Contact[]>,
 		required: true,
 	},
 	selected: {

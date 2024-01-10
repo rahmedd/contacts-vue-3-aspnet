@@ -121,19 +121,37 @@ public class ContactService
 		var contactsQuery = _context.Contacts
 			.Where(c => c.Users
 				.Any(u => u.Id == user.Id)
-			)
-            .Where(c => (c.Firstname + " " + c.Lastname).Contains(searchQuery))
-			.Select(x =>
-				new ContactsGetDto
+			);
+
+		// if searching by full/partial name
+		if (searchQuery.Length > 1)
+		{
+			contactsQuery = contactsQuery
+				.Where(c =>
+					(c.Firstname.StartsWith(searchQuery) || c.Lastname.StartsWith(searchQuery)) ||
+					((c.Firstname + " " + c.Lastname).StartsWith(searchQuery)) ||
+					((c.Lastname + " " + c.Firstname).StartsWith(searchQuery))
+				);
+		}
+		// else searching by letter
+		else
+		{
+			contactsQuery = contactsQuery
+				.Where(c =>
+					(c.Firstname.StartsWith(searchQuery))
+				);
+		}
+
+		var contacts = await contactsQuery
+			.Select(x => new ContactsGetDto
 				{
 					Id = x.Id,
 					Firstname = x.Firstname,
 					Lastname = x.Lastname
 				}
 			)
-			.OrderBy(c => c.Firstname);
-
-		var contacts = await contactsQuery.ToListAsync();
+			.OrderBy(c => c.Firstname)
+			.ToListAsync();
 
 		return contacts;
 	}
