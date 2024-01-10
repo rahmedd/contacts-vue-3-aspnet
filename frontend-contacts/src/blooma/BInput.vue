@@ -8,9 +8,12 @@ import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
 
 const props = defineProps({
-	modelValue: String,
 	placeholder: String,
 	icon: String,
+	modelValue: {
+		type: String,
+		required: true,
+	},
 	name: {
 		type: String,
 		required: true,
@@ -85,30 +88,8 @@ const inputClasses = computed(() => {
 	}
 })
 
-// const inputClassesDebounced = ref({
-// 	input: true,
-// 	validated: false,
-// 	[props.size]: true,
-// 	[BloomaTypes.Danger]: false,
-// 	[BloomaTypes.Success]: false,
-// })
-
-// const debounceinputClasses = useDebounceFn(() => {
-// 	inputClassesDebounced.value.validated = inputClasses.value.validated
-// 	inputClassesDebounced.value[props.size] = inputClasses.value[props.size]
-// 	inputClassesDebounced.value[BloomaTypes.Danger] = inputClasses.value[BloomaTypes.Danger]
-// 	inputClassesDebounced.value[BloomaTypes.Success] = inputClasses.value[BloomaTypes.Success]
-// }, 50)
-
-// watch(inputClasses, async () => {
-// 	await debounceinputClasses()
-// })
-
 // validate on blur
 async function validateOnBlur(evt: any) {
-	// handleBlur(evt)
-	// setTouched(true)
-	// validate()
 	if (!props.val$) {
 		return
 	}
@@ -118,10 +99,6 @@ async function validateOnBlur(evt: any) {
 
 // validate on change after blur
 async function validateOnInput(evt: any) {
-	// handleChange(evt, false)
-	// setTouched(true)
-	// validate()
-
 	if (!props.val$) {
 		return
 	}
@@ -142,7 +119,6 @@ async function handleValidationMode(evt: Event) {
 	const v$ = props.val$ || {}
 
 	// updateParent(val)
-	await updateParentDebounced(val)
 
 	switch (evt.type) {
 		case 'blur':
@@ -151,12 +127,15 @@ async function handleValidationMode(evt: Event) {
 					await validateOnBlur(evt)
 					break;
 				case BloomaValidationModes.Eager:
+					await updateParentDebounced(val)
 					await validateOnBlur(evt)
 					break;
 				case BloomaValidationModes.Lazy:
+					await updateParentDebounced(val)
 					await validateOnBlur(evt)
 					break;
 				case BloomaValidationModes.Passive:
+					await updateParentDebounced(val)
 					break;
 			}
 			break;
@@ -164,27 +143,27 @@ async function handleValidationMode(evt: Event) {
 		case 'input':
 			switch (mode) {
 				case BloomaValidationModes.Aggressive:
-					// await validateOnInput(evt)
+					await updateParentDebounced(val)
 					await touchDebounced()
 					break;
 				case BloomaValidationModes.Eager:
+					await updateParentDebounced(val)
 					if (!v$.$dirty) {
 						break;
 					}
 					await validateOnInput(evt)
 					break;
 				case BloomaValidationModes.Lazy:
+					await updateParentDebounced(val)
 					// Issue with vee-validate, executing validations even though validateOnValueUpdate: false
 					break;
 				case BloomaValidationModes.Passive:
+					await updateParentDebounced(val)
 					break;
 			}
 			break;
 	}
-	// await debounceinputClasses()
 }
-
-// const handleValidationModeDebounce = useDebounceFn(handleValidationMode, props.debounce)
 
 const controlClasses = computed(() => ({
 	'has-icons-left': !!props.icon,
@@ -199,6 +178,11 @@ const fieldMsg = computed(() => {
 	}
 
 	return ''
+})
+
+// sync parent state change
+watch(() => props.modelValue, () => {
+	inputValue.value = props.modelValue
 })
 
 </script>

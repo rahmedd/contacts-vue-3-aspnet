@@ -1,42 +1,58 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref, watch, type PropType } from 'vue';
 
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
-import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 
-import { AlphabetModes } from '@/enums/AlphabetModes'
+import { ContactSearchModes } from '@/enums/ContactSearchModes'
 
 import BButton from '@/blooma/BButton.vue'
 
-const props = defineProps({})
-const emits = defineEmits(['update:modelValue'])
 
-const alphaMode = ref<AlphabetModes>(AlphabetModes.ALL)
+const props = defineProps({
+	modelValue: String,
+	searchMode: {
+		type: Number as PropType<ContactSearchModes>,
+		required: true,
+	},
+})
+
+const emits = defineEmits([
+	'update:modelValue',
+	'update:searchMode',
+])
+
 const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
 const letters = ref<string[]>([...alphabet])
 const selectedLetter = ref(letters.value[0])
 
-function updateParent() {
-	// if all is selected update parent state with empty string
-	if (alphaMode.value === AlphabetModes.ALL) {
-		emits('update:modelValue', '')
-	}
-	else {
-		emits('update:modelValue', selectedLetter.value)
-	}
+function updateMode(mode: ContactSearchModes) {
+	emits('update:searchMode', mode)
+}
+
+function updateModel() {
+	console.log(props.searchMode)
+	console.log(selectedLetter.value)
+	emits('update:modelValue', selectedLetter.value)
 }
 
 function selectLetter(letter: string) {
-	alphaMode.value = AlphabetModes.ALPHA
+	updateMode(ContactSearchModes.ALPHA)
 	selectedLetter.value = letter
-	updateParent()
+	updateModel()
 }
 
 function selectAll() {
-	alphaMode.value = AlphabetModes.ALL
-	updateParent()
+	updateMode(ContactSearchModes.ALL)
+	selectedLetter.value = ''
+	updateModel()
 }
 
+// if modelValue is not found in alphabet set to all mode
+// watch(() => props.modelValue, () => {
+// 	if (!alphabet.find(x => x === props.modelValue)) {
+// 		updateMode(ContactSearchModes.ALL)
+// 	}
+// })
 </script>
 
 <template lang="pug">
@@ -44,13 +60,13 @@ div
 	div.letter
 		BButton(
 			:type="BloomaTypes.Primary"
-			:light="alphaMode === AlphabetModes.ALPHA"
+			:light="searchMode === ContactSearchModes.ALPHA"
 			@click="() => selectAll()"
 		) all
 	div.letter(v-for="(letter, index) in letters" :class="{ odd: index % 2 }")
 		BButton(
 			:type="BloomaTypes.Primary"
-			:light="!(letter === selectedLetter && alphaMode === AlphabetModes.ALPHA)"
+			:light="!(letter === selectedLetter && searchMode === ContactSearchModes.ALPHA)"
 			@click="() => selectLetter(letter)"
 		) {{ letter }}
 </template>

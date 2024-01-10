@@ -11,7 +11,7 @@ import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 // types
 import { EditContactModes } from '@/enums/EditContactModes';
 import { Contact } from '@/requestTypes/Contact'
-import { ComposeResultState } from '@/enums/ComposeResultState'
+import { ContactSearchModes } from '@/enums/ContactSearchModes'
 
 // components
 import BButton from '@/blooma/BButton.vue'
@@ -19,6 +19,7 @@ import BInput from '@/blooma/BInput.vue'
 import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
+import SearchContact from '@/components/SearchContact.vue'
 
 const authStore = useAuthStore()
 
@@ -38,6 +39,7 @@ const {
 const selected = ref<number>(0) // id
 const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
 const searchQuery = ref<string>('')
+const searchMode = ref<ContactSearchModes>(ContactSearchModes.ALL)
 
 function updateMode(mode: EditContactModes) {
 	viewMode.value = mode
@@ -66,8 +68,13 @@ function createContact() {
 	updateMode(EditContactModes.EDIT)
 }
 
-async function searchContacts() {
+async function searchContacts(sq: string) {
+	searchQuery.value = sq
 	await getContacts(searchQuery.value)
+}
+
+function updateSearchMode(mode: ContactSearchModes) {
+	searchMode.value = mode
 }
 
 onMounted(async () => {
@@ -82,14 +89,11 @@ div.contact-container
 		div.new-container
 			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="createContact") +
 		div.search-container
-			BInput(
-				placeholder='Search'
-				name='search'
+			SearchContact(
 				v-model="searchQuery"
 				@update:modelValue="searchContacts"
-				:mode="BloomaValidationModes.Aggressive"
-				:showLabel="false"
-				:debounce="250"
+				:searchMode="searchMode"
+				@update:searchMode="updateSearchMode"
 			)
 		div.end-nav-container
 			//- p hello3
@@ -97,6 +101,8 @@ div.contact-container
 			Alphabet(
 				v-model="searchQuery"
 				@update:modelValue="searchContacts"
+				:searchMode="searchMode"
+				@update:searchMode="updateSearchMode"
 			)
 		div.contact-select-container.scrollable
 			SelectContact(
