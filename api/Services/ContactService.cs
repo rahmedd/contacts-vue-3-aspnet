@@ -128,7 +128,6 @@ public class ContactService
 		{
 			contactsQuery = contactsQuery
 				.Where(c =>
-					(c.Firstname.StartsWith(searchQuery) || c.Lastname.StartsWith(searchQuery)) ||
 					((c.Firstname + " " + c.Lastname).StartsWith(searchQuery)) ||
 					((c.Lastname + " " + c.Firstname).StartsWith(searchQuery))
 				);
