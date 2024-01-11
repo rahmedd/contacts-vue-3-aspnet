@@ -50,8 +50,7 @@ const form = reactive(
 		props.contact.id,
 		props.contact.firstname,
 		props.contact.lastname,
-		props.contact.customFields.map(f => { return { ...f } } )),
-		// props.contact.customFields.map(f => new ContactCustomField(f.fieldName, f.fieldValue, f.fieldType))
+		props.contact.customFields.map(f => new ContactCustomField(f.id, f.fieldName, f.fieldValue, f.fieldType))),
 )
 
 //- vuelidate inject subform
@@ -123,6 +122,7 @@ function createCustomField(fieldType: ContactCustomFieldTypes) {
 
 	form.customFields.push(
 		new ContactCustomField(
+			0,
 			'',
 			'',
 			fieldType,
@@ -132,7 +132,7 @@ function createCustomField(fieldType: ContactCustomFieldTypes) {
 
 function updateCustomField(field: ContactCustomField) {
 	const idx = form.customFields.findIndex(f => f.internalId === field.internalId)
-	if (idx < 0) {
+	if (idx < 1) {
 		console.log('updateCustomField: field not found')
 		return
 	}
