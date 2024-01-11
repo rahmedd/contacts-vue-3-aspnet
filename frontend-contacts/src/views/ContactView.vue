@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // lib
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useAuthStore } from '@/stores/auth'
 import { useGetContact, useGetContacts } from '@/composables/ContactMethods';
 
@@ -40,6 +40,7 @@ const selected = ref<number>(0) // id
 const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
 const searchQuery = ref<string>('')
 const searchMode = ref<ContactSearchModes>(ContactSearchModes.ALL)
+const renderContact = ref(true) // TODO: remove this hack
 
 function updateMode(mode: EditContactModes) {
 	viewMode.value = mode
@@ -75,6 +76,17 @@ async function searchContacts(sq: string) {
 
 function updateSearchMode(mode: ContactSearchModes) {
 	searchMode.value = mode
+}
+
+// TODO: remove this hack
+async function resetForm() {
+	if (!contact.value) {
+		return
+	}
+
+	renderContact.value = false
+	await nextTick()
+	renderContact.value = true
 }
 
 onMounted(async () => {
@@ -113,11 +125,12 @@ div.contact-container
 			)
 		div.contact-view-container.scrollable
 			EditContact(
-				v-if="contact"
+				v-if="contact && renderContact"
 				:key="contact.id"
 				:contact="contact"
 				:mode="viewMode"
 				@mode="updateMode"
+				@resetForm="resetForm"
 			)
 			h1(v-else)
 			//- h1(v-else) Select a contact

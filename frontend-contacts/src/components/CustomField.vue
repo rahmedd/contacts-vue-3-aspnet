@@ -48,20 +48,17 @@ const fieldTypes = Object.keys(ContactCustomFieldTypes).filter((v) => isNaN(Numb
 // 	[ContactCustomFieldTypes.TSTRING]: 'Text',
 // }
 
-function updateFieldName(evt: Event) {
-	const val = (evt.target as HTMLInputElement).value
+function updateFieldName(val: string) {
 	form.fieldName = val
 	updateField()
 }
 
-function updateFieldValue(evt: Event) {
-	const val = (evt.target as HTMLInputElement).value
+function updateFieldValue(val: string) {
 	form.fieldValue = val
 	updateField()
 }
 
 function updateFieldType(evt: ContactCustomFieldTypes) {
-	// const val = (evt.target as HTMLInputElement).value
 	form.fieldType = evt
 	updateField()
 }
@@ -78,7 +75,7 @@ div.field-row
 			:showLabel="true"
 			:val$="v$.fieldName"
 			:modelValue="form.fieldName"
-			@input="updateFieldName"
+			@update:modelValue="updateFieldName"
 		)
 	div.field
 		BInput(
@@ -89,7 +86,7 @@ div.field-row
 			:val$="v$.fieldValue"
 			:date="form.fieldType === ContactCustomFieldTypes.DATE"
 			:modelValue="form.fieldValue"
-			@input="updateFieldValue"
+			@update:modelValue="updateFieldValue"
 		)
 	div.field(v-if="!simple")
 		BSelect.field-is-small(

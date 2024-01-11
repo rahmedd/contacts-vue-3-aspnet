@@ -42,6 +42,7 @@ const props = defineProps({
 const emits = defineEmits<{
 	updateId: [id: number],
 	mode: [mode: EditContactModes],
+	resetForm: [],
 }>()
 
 const form = reactive(
@@ -70,6 +71,15 @@ function updateMode(mode: EditContactModes) {
 	emits('mode', mode)
 }
 
+function editContact() {
+	updateMode(EditContactModes.EDIT)
+}
+
+function cancelEdit() {
+	updateMode(EditContactModes.VIEW)
+	emits('resetForm')
+}
+
 async function saveContact() {
 	const res = await v$.value.$validate()
 	if (!res) {
@@ -94,10 +104,6 @@ async function saveContact() {
 	}
 
 	updateMode(EditContactModes.VIEW)
-}
-
-function editContact() {
-	updateMode(EditContactModes.EDIT)
 }
 
 async function deleteContact(id: number) {
@@ -191,7 +197,7 @@ div.edit-contact-container
 				Icon(icon="ci:add-row" height="24")
 
 	div.contact-form(v-else)
-		div.row.label Name
+		div.row.label &nbsp;
 		div.row
 			h1.title.is-4 {{ form.firstname }} {{ form.lastname }}
 		hr
@@ -224,19 +230,22 @@ div.edit-contact-container
 			hr
 
 	div.button-bar
-		BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Primary" @click="saveContact") Save
-		BButton(v-else :type="BloomaTypes.Primary" @click="editContact") Edit
-		BButton(:type="BloomaTypes.Danger" @click="toggleDeleteModal")
-			span.icon
-				Icon(icon="mdi:trash" height="22")
-				BModal(v-if="deleteModal")
-					template(v-slot:header)
-						p.modal-card-title Delete {{ form.firstname }}?
-					template(v-slot:content)
-						span Are you sure you want to delete {{ form.firstname }}'s contact?
-					template(v-slot:footer)
-						BButton(:type="BloomaTypes.Danger" @click="deleteContact") Delete
-						BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
+		.button-bar-left
+			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Primary" @click="saveContact") Save
+			BButton(v-else :type="BloomaTypes.Primary" @click="editContact") Edit
+			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Default" @click="cancelEdit") Cancel
+		.button-bar-right
+			BButton(v-if="props.contact.id !== 0" :type="BloomaTypes.Danger" @click="toggleDeleteModal")
+				span.icon
+					Icon(icon="mdi:trash" height="22")
+					BModal(v-if="deleteModal")
+						template(v-slot:header)
+							p.modal-card-title Delete {{ form.firstname }}?
+						template(v-slot:content)
+							span Are you sure you want to delete {{ form.firstname }}'s contact?
+						template(v-slot:footer)
+							BButton(:type="BloomaTypes.Danger" @click="deleteContact") Delete
+							BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
 </template>
 
 <style lang="scss" scoped>
@@ -307,6 +316,10 @@ $gap: 20px;
 	justify-content: space-between;
 	padding: $gap $gap;
 	background: $bl-primary-light;
+}
+
+.button-bar-left > * {
+	margin-right: $gap;
 }
 
 @media screen and (max-width: $tablet) {

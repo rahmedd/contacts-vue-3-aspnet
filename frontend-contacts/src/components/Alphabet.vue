@@ -30,8 +30,6 @@ function updateMode(mode: ContactSearchModes) {
 }
 
 function updateModel() {
-	console.log(props.searchMode)
-	console.log(selectedLetter.value)
 	emits('update:modelValue', selectedLetter.value)
 }
 
@@ -46,13 +44,6 @@ function selectAll() {
 	selectedLetter.value = ''
 	updateModel()
 }
-
-// if modelValue is not found in alphabet set to all mode
-// watch(() => props.modelValue, () => {
-// 	if (!alphabet.find(x => x === props.modelValue)) {
-// 		updateMode(ContactSearchModes.ALL)
-// 	}
-// })
 </script>
 
 <template lang="pug">
@@ -88,11 +79,5 @@ div
 	font-size: 24px;
 	font-weight: 600;
 	border-radius: 0;
-}
-
-.odd > .button {
-	// background: rgb(241, 241, 241);
-	// color: red;
-	// border: 2px red;
 }
 </style>
