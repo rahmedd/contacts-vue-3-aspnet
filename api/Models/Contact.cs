@@ -9,8 +9,6 @@ public class Contact
 
 	public string Lastname { get; set; }
 
-	//public List<UserContact> UserContacts { get; set; } = new();
-
 	public List<User> Users { get; set; } = new();
 
 	public ICollection<ContactCustomField> CustomFields { get; set; } = new List<ContactCustomField>();
