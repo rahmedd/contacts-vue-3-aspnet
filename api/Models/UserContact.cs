@@ -8,5 +8,9 @@ public class UserContact
 
 	public int ContactId { get; set; }
 
+	public User User { get; set; } = null!;
+
+	public Contact Contact { get; set; } = null!;
+
 	public DateTime CreatedAt { get; set; }
 }

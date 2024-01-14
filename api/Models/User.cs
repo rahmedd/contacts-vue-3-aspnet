@@ -21,4 +21,6 @@ public class User
 	public DateTime UpdateAt { get; set; }
 
 	public List<Contact> Contacts { get; set; } = new();
+
+	public List<UserContact> UserContacts { get; set; } = new();
 }

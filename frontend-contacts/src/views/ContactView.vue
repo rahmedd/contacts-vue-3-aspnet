@@ -35,7 +35,6 @@ const {
 	action: getContact,
 } = useGetContact()
 
-// const contacts = ref<ContactResponse[]>([])
 const selected = ref<number>(0) // id
 const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
 const searchQuery = ref<string>('')
@@ -46,7 +45,11 @@ function updateMode(mode: EditContactModes) {
 	viewMode.value = mode
 }
 
-async function selectContact(id: number) {
+function updateSearchMode(mode: ContactSearchModes) {
+	searchMode.value = mode
+}
+
+async function selectAndGetContact(id: number) {
 	if (viewMode.value === EditContactModes.EDIT) {
 		// Open dialog
 		return
@@ -54,8 +57,13 @@ async function selectContact(id: number) {
 
 	selected.value = id
 
+	// if new contact
+	if (id === 0) {
+		contact.value = new Contact(0, '', '', [])
+		return
+	}
+
 	try {
-		// await getContact(`Contact/${id}`)
 		await getContact(id)
 	}
 	catch (ex) {
@@ -64,18 +72,14 @@ async function selectContact(id: number) {
 	}
 }
 
-function createContact() {
-	contact.value = new Contact(0, '', '', [])
+async function createContact() {
+	await selectAndGetContact(0)
 	updateMode(EditContactModes.EDIT)
 }
 
 async function searchContacts(sq: string) {
 	searchQuery.value = sq
 	await getContacts(searchQuery.value)
-}
-
-function updateSearchMode(mode: ContactSearchModes) {
-	searchMode.value = mode
 }
 
 // TODO: remove this hack
@@ -87,6 +91,12 @@ async function resetForm() {
 	renderContact.value = false
 	await nextTick()
 	renderContact.value = true
+}
+
+async function refreshContactsAndSelect(id: number) {
+	updateSearchMode(ContactSearchModes.ALL)
+	await getContacts()
+	await selectAndGetContact(id)
 }
 
 onMounted(async () => {
@@ -121,7 +131,7 @@ div.contact-container
 				:contacts="contacts"
 				:selected="selected"
 				:mode="viewMode"
-				@update="selectContact"
+				@update="selectAndGetContact"
 			)
 		div.contact-view-container.scrollable
 			EditContact(
@@ -129,8 +139,9 @@ div.contact-container
 				:key="contact.id"
 				:contact="contact"
 				:mode="viewMode"
-				@mode="updateMode"
+				@updateMode="updateMode"
 				@resetForm="resetForm"
+				@updateId="refreshContactsAndSelect"
 			)
 			h1(v-else)
 			//- h1(v-else) Select a contact
