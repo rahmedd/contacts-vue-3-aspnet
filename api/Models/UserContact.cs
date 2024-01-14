@@ -13,4 +13,6 @@ public class UserContact
 	public Contact Contact { get; set; } = null!;
 
 	public DateTime CreatedAt { get; set; }
+
+	public bool IsOwner { get; set; }
 }

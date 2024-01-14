@@ -86,8 +86,15 @@ public class ContactService
 			contact.CustomFields.Add(customField);
 		}
 
-		// Save changes
+		UserContact userContact = new()
+		{
+			Contact = contact,
+			User = user,
+			IsOwner = true,
+		};
+
 		await _context.AddAsync(contact);
+		await _context.AddAsync(userContact);
 		await _context.SaveChangesAsync();
 
 		ContactDto contactRes = _mapper.Map<ContactDto>(contact);
