@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using api.Data;
 
@@ -10,9 +11,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240114105915_reset-init-mi")]
+    partial class resetinitmi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,9 +108,6 @@ namespace api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsOwner")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -133,33 +133,22 @@ namespace api.Migrations
 
             modelBuilder.Entity("api.Models.UserContact", b =>
                 {
-                    b.HasOne("api.Models.Contact", "Contact")
-                        .WithMany("UserContacts")
+                    b.HasOne("api.Models.Contact", null)
+                        .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("api.Models.User", "User")
-                        .WithMany("UserContacts")
+                    b.HasOne("api.Models.User", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("api.Models.Contact", b =>
                 {
                     b.Navigation("CustomFields");
-
-                    b.Navigation("UserContacts");
-                });
-
-            modelBuilder.Entity("api.Models.User", b =>
-                {
-                    b.Navigation("UserContacts");
                 });
 #pragma warning restore 612, 618
         }

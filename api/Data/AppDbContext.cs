@@ -10,15 +10,16 @@ public class AppDbContext : DbContext
 	{
 	}
 
-    //protected override void OnModelCreating(ModelBuilder modelBuilder)
-    //{
-    //    modelBuilder.Entity<User>()
-    //        .HasMany(e => e.Contacts)
-    //        .WithMany(e => e.Users)
-    //        .UsingEntity("UsersToContactsJoinTable");
-    //}
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		modelBuilder.Entity<User>()
+			.HasMany(e => e.Contacts)
+			.WithMany(e => e.Users)
+			.UsingEntity<UserContact>();
+	}
 
-    public DbSet<User> Users { get; set; } = null!;
+	public DbSet<User> Users { get; set; } = null!;
 	public DbSet<Contact> Contacts { get; set; } = null!;
+	public DbSet<UserContact> UserContacts { get; set; } = null!;
 	public DbSet<ContactCustomField> ContactCustomFields { get; set; } = null!;
 }

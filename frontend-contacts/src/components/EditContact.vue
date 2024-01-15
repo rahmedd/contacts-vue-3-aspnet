@@ -41,7 +41,7 @@ const props = defineProps({
 
 const emits = defineEmits<{
 	updateId: [id: number],
-	mode: [mode: EditContactModes],
+	updateMode: [mode: EditContactModes],
 	resetForm: [],
 }>()
 
@@ -66,8 +66,13 @@ const deleteModal = ref<boolean>(false)
 const { action: updateContact } = useUpdateContact()
 const { action: createContact } = useCreateContact()
 
+// used for new contact
+function updateContactId(id: number) {
+	emits('updateId', id)
+}
+
 function updateMode(mode: EditContactModes) {
-	emits('mode', mode)
+	emits('updateMode', mode)
 }
 
 function editContact() {
@@ -86,10 +91,14 @@ async function saveContact() {
 	}
  
 	try {
-		// creating a newcontact
+		// creating a new contact
 		if (props.contact.id === 0) {
 			const createRes = await createContact(form)
+			
+			// Selected contact can change on creation of new contact or delete contact
+			updateContactId(createRes!.id)
 		}
+
 		// updating a contact
 		else {
 			const updateRes = await updateContact(form)
@@ -99,6 +108,7 @@ async function saveContact() {
 		}
 	}
 	catch (ex) {
+		console.log(ex)
 		console.log('saveContact error')
 	}
 
@@ -132,7 +142,7 @@ function createCustomField(fieldType: ContactCustomFieldTypes) {
 
 function updateCustomField(field: ContactCustomField) {
 	const idx = form.customFields.findIndex(f => f.internalId === field.internalId)
-	if (idx < 1) {
+	if (idx < 0) {
 		console.log('updateCustomField: field not found')
 		return
 	}
