@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { reactive, type PropType } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { helpers, required, email } from '@vuelidate/validators'
+import { helpers, required } from '@vuelidate/validators'
+import { customValidatorBase } from '@/validation/customValidatorBase'
+import { fieldTypeValidator } from '@/validation/fieldTypeValidator'
+
+import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 
 import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
-import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
-import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
 import { ContactCustomFieldTypes } from "@/enums/ContactCustomFieldTypes"
-// import { MappingEnum } from '@/types/MappingEnum'
 
 import BInput from '@/blooma/BInput.vue'
 import BSelect from '@/blooma/BSelect.vue'
@@ -29,10 +30,19 @@ const emits = defineEmits<{
 const form = reactive<ContactCustomField>({ ...props.field })
 
 const isRequired = helpers.withMessage('Required', required)
+// this rule isn't actaually async but it's the only way I can pass the params
+const asyncValidator = helpers.withAsync(
+	customValidatorBase(fieldTypeValidator),
+	() => props.field.fieldType,
+)
+
 const rules = {
 	fieldName: { isRequired, },
 	fieldType: { isRequired, },
-	fieldValue: { isRequired, },
+	fieldValue: {
+		isRequired,
+		dynRule: asyncValidator,
+	},
 }
 
 const v$ = useVuelidate(rules, form)
