@@ -6,11 +6,13 @@ import apiClient from '@/services/axios'
 import { useAuthStore } from '@/stores/auth'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers, minLength } from '@vuelidate/validators'
+import { customValidatorBase } from '@/validation/customValidatorBase'
 
 import type BaseReponse from '@/responseTypes/BaseResponse'
 import type LoginResponse from '@/responseTypes/LoginResponse'
 import type SignupRequest from '@/requestTypes/SignupRequest'
 import type UsernameRequest from '@/requestTypes/UsernameRequest'
+
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 
@@ -42,24 +44,7 @@ const rules = {
 		// 	}) => `This field has a value of '${$model}' but must have a min length of ${JSON.stringify($params)} so it is ${$invalid ? 'invalid' : 'valid'}`,
 		// 	helpers.withAsync(async () => ({ $message: 'please work' }))
 		// )
-		unique: {
-			$async: true,
-			// the trick
-			$message: ({ $response }: { $response: { $valid: boolean, yourErrorMessage: boolean } }) => {
-				return $response?.yourErrorMessage ?? 'default error message'
-			},
-			$validator: async (value: string) => {
-				if (value === '')
-					return true;
-
-				const response = await checkUsernameCached(value)
-
-				return {
-					$valid: response.success,
-					yourErrorMessage: response.message,
-				}
-			},
-		}
+		unique: customValidatorBase(checkUsernameCached)
 	},
 	password: { isRequired },
 	confirmPassword: { isRequired },

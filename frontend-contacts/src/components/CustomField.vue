@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { reactive, type PropType } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { helpers, required, email } from '@vuelidate/validators'
+import { helpers, required } from '@vuelidate/validators'
+import { customValidatorBase } from '@/validation/customValidatorBase'
+import { validators } from '@/validation/customFieldValidators'
 
-import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+
+import type { ContactCustomField } from '@/requestTypes/ContactCustomField'
+import BaseReponse from '@/responseTypes/BaseResponse'
 import { ContactCustomFieldTypes } from "@/enums/ContactCustomFieldTypes"
-// import { MappingEnum } from '@/types/MappingEnum'
 
 import BInput from '@/blooma/BInput.vue'
 import BSelect from '@/blooma/BSelect.vue'
@@ -29,10 +32,75 @@ const emits = defineEmits<{
 const form = reactive<ContactCustomField>({ ...props.field })
 
 const isRequired = helpers.withMessage('Required', required)
+// const dynamicRule = (param: any) =>
+// 	helpers.withParams(
+// 		{ type: 'contains', value: param },
+// 		(value) => {
+// 			console.log('hello')
+// 			console.log(siblings)
+// 			return !helpers.req(value) || value.includes(param)
+// 		}
+// 	)
+
+function fieldTypeValidator(fieldValue: string, field: ContactCustomField): BaseReponse<null> {
+	console.log('ftvalidator')
+	console.log(fieldValue)
+	console.log(field)
+
+	const fieldType = field.fieldType
+	
+	if (fieldType === ContactCustomFieldTypes.DATE) {
+		const date = new Date(fieldValue)
+		const isDate: boolean = !isNaN(date.getFullYear())
+		return new BaseReponse(isDate, 'Invalid date', null)
+	}
+
+	else if (fieldType === ContactCustomFieldTypes.EMAIL) {
+		const re = /\S+@\S+\.\S+/;
+		const res: boolean = re.test(fieldValue)
+		return new BaseReponse(res, 'Invalid email', null)
+	}
+
+	else if (fieldType === ContactCustomFieldTypes.PHONE) {
+		const re = /^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$/;
+		const res: boolean = re.test(fieldValue)
+		return new BaseReponse(res, 'Invalid phone', null)
+	}
+
+	else if (fieldType === ContactCustomFieldTypes.SECRET) {
+		return new BaseReponse(true, '', null)
+	}
+
+	else if (fieldType === ContactCustomFieldTypes.TEXT) {
+		return new BaseReponse(true, '', null)
+	}
+
+	else {
+		console.log('fieldTypeValidator: error invalid field type')
+		return new BaseReponse(false, 'internal error', null)
+	}
+}
+
+const vali = (val: any, field: any) => {
+	console.log('vali')
+	console.log(field)
+	return true
+}
+// const asyncValidator = helpers.withAsync(fieldTypeValidator, () => props.field.fieldType)
+const asyncValidator = helpers.withAsync(
+	customValidatorBase(fieldTypeValidator),
+	() => props.field.fieldType
+)
+
 const rules = {
 	fieldName: { isRequired, },
 	fieldType: { isRequired, },
-	fieldValue: { isRequired, },
+	fieldValue: {
+		isRequired,
+		dynRule: asyncValidator,
+		// dynRule: customValidatorBase(fieldTypeValidator, () => props.field.fieldType),
+		// dynRule: helpers.withParams({}, fieldTypeValidator)
+	},
 }
 
 const v$ = useVuelidate(rules, form)

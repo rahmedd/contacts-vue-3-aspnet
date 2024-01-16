@@ -32,7 +32,7 @@ public class ContactService
 		// Update fields
 		foreach (ContactCustomFieldDto field in contactDto.CustomFields)
 		{
-			if (field.Id == null) { continue; }
+			if (field.Id == null || field.Id == 0) { continue; }
 
 			var cf = _context.ContactCustomFields.First(x => x.Id == field.Id && x.Contact.Id == contact.Id);
 			cf.FieldName = field.FieldName;
@@ -43,7 +43,7 @@ public class ContactService
 		// Add fields 
 		foreach (ContactCustomFieldDto field in contactDto.CustomFields)
 		{
-			if (field.Id != null) { continue; }
+			if (field.Id != null && field.Id != 0) { continue; }
 
 			ContactCustomField customField = new()
 			{
