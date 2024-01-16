@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, type PropType } from 'vue'
+import { reactive, type PropType, computed } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { helpers, required } from '@vuelidate/validators'
 import { customValidatorBase } from '@/validation/customValidatorBase'
@@ -12,6 +12,7 @@ import { ContactCustomFieldTypes } from "@/enums/ContactCustomFieldTypes"
 
 import BInput from '@/blooma/BInput.vue'
 import BSelect from '@/blooma/BSelect.vue'
+import { BloomaInputTypes } from '@/blooma/enums/BloomaInputTypes'
 
 const props = defineProps({
 	field: {
@@ -73,6 +74,14 @@ function updateFieldType(evt: ContactCustomFieldTypes) {
 	updateField()
 }
 
+const inputType = computed(() => {
+	if (form.fieldType === ContactCustomFieldTypes.DATE) {
+		return BloomaInputTypes.DATE
+	}
+
+	return BloomaInputTypes.TEXT
+})
+
 </script>
 
 <template lang="pug">
@@ -94,7 +103,7 @@ div.field-row
 			:debounce="250"
 			:showLabel="true"
 			:val$="v$.fieldValue"
-			:date="form.fieldType === ContactCustomFieldTypes.DATE"
+			:inputType="inputType"
 			:modelValue="form.fieldValue"
 			@update:modelValue="updateFieldValue"
 		)

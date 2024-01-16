@@ -12,6 +12,7 @@ import type BaseReponse from '@/responseTypes/BaseResponse';
 import type User from '@/responseTypes/User';
 import type LoginRequest from '@/requestTypes/LoginRequest';
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes';
+import { BloomaInputTypes } from '@/blooma/enums/BloomaInputTypes'
 
 
 import BInput from '@/blooma/BInput.vue'
@@ -88,8 +89,19 @@ async function submitLogin(evt: Event) {
 LoginForm(:loading="isLoading" @keyup.enter="submitLogin")
 	.login-container
 		h1.login-title Log in
-		BInput#username.login-input(placeholder="Username" name="username" v-model="form.username" :val$="v$.username")
-		BInput#password(placeholder="Password" name="password" v-model="form.password" :val$="v$.password")
+		BInput#username.login-input(
+			placeholder="Username"
+			name="username"
+			v-model="form.username"
+			:val$="v$.username"
+		)
+		BInput#password(
+			placeholder="Password"
+			name="password"
+			v-model="form.password"
+			:val$="v$.password"
+			:inputType="BloomaInputTypes.PASSWORD"
+		)
 
 		.field
 			BButton.login-btn(:type="BloomaTypes.Primary" @click="submitLogin" :action="true") Log in

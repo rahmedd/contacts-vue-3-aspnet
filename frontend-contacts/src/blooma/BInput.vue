@@ -6,6 +6,7 @@ import { FormLoadingKey } from '@/blooma/symbols'
 import { BloomaTypes } from '@/blooma/enums/BloomaTypes'
 import { BloomaValidationModes } from '@/blooma/enums/BloomaValidationModes'
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
+import { BloomaInputTypes } from '@/blooma/enums/BloomaInputTypes'
 
 const props = defineProps({
 	placeholder: String,
@@ -45,10 +46,10 @@ const props = defineProps({
 	val$: {
 		type: Object // vuelidate types don't work
 	},
-	// TODO: replace with datepicker component
-	date: {
-		type: Boolean
-	}
+	inputType: {
+		type: String as PropType<BloomaInputTypes>,
+		default: BloomaInputTypes.TEXT,
+	},
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -193,7 +194,7 @@ div.field
 	div.control(:class="controlClasses")
 		input(
 			v-model="inputValue"
-			:type="date ? 'date' : 'text'"
+			:type="inputType"
 			:class="inputClasses"
 			:placeholder="placeholder"
 			:disabled="formLoading"
