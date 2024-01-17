@@ -51,14 +51,15 @@ const rules = {
 	confirmPassword: { isRequired },
 }
 
-const v$ = useVuelidate(rules, form)
+const $externalResults = ref({})
+const v$ = useVuelidate(rules, form, { $externalResults })
 
 const {
 	data: loginRes,
 	isFinished: loginFinished,
 	execute: loginSendRequest,
 	isLoading: isLoading,
-} = useAxios<BaseReponse<LoginResponse>>('Auth/Login', { method: 'POST' }, apiClient, { immediate: false })
+} = useAxios<BaseReponse<LoginResponse>>('Auth/Signup', { method: 'POST' }, apiClient, { immediate: false })
 
 const {
 	data: checkUsernameRes,
@@ -68,6 +69,7 @@ const {
 
 async function submitSignup(evt: Event) {
 	evt.preventDefault()
+	$externalResults.value = {}
 
 	try {
 		const vres = await v$.value.$validate()
@@ -94,7 +96,7 @@ async function submitSignup(evt: Event) {
 
 		if (!res.success) {
 			authStore.login(false, res.body)
-			// setFieldError('password', 'Error creating account')
+			$externalResults.value = { password: 'Error creating account' }
 			return
 		}
 	}
@@ -102,6 +104,8 @@ async function submitSignup(evt: Event) {
 		console.log('Error: submitSignup request failed')
 		console.log(ex)
 	}
+
+	router.push("/login")
 }
 
 async function checkUsernameCached(username: string): Promise<BaseReponse<null>> {
