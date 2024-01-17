@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using api.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using api.Services;
 
 namespace api.Controllers;
 
@@ -17,12 +18,14 @@ namespace api.Controllers;
 public class AuthController : ControllerBase
 {
 	private readonly AppDbContext _context;
+	private readonly UserService _userService;
 	private readonly IMapper _mapper;
 
-	public AuthController(AppDbContext context, IMapper mapper)
+	public AuthController(AppDbContext context, IMapper mapper, UserService userService)
 	{
 		_context = context;
 		_mapper = mapper;
+		_userService = userService;
 	}
 
 	[Authorize]
@@ -45,24 +48,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Signup")]
-	public async Task<ActionResult<BaseResponse<UserDto>>> PostSignup([FromBody] LoginDto signup)
+	public async Task<ActionResult<BaseResponse<UserDto>>> PostSignup([FromBody] LoginDto loginDto)
 	{
-		var user = new User()
-		{
-			Username = signup.Username,
-			Password = signup.Password, // TODO: Use password hash/function
-            CreatedAt = DateTime.UtcNow,
-		};
-
-		await _context.Users.AddAsync(user);
-		await _context.SaveChangesAsync();
-
-		//var userDto = _mapper.Map<UserDto>(user);
-		UserDto userDto = new UserDto()
-		{
-			Id = user.Id,
-			Username = user.Username,
-		};
+		UserDto userDto = await _userService.CreateUserAsync(loginDto);
 
 		var res = new BaseResponse<UserDto> { Success = true, Message = "", Body = userDto };
 		return Ok(res);
@@ -77,8 +65,14 @@ public class AuthController : ControllerBase
 		}
 
 		User user = await _context.Users.FirstOrDefaultAsync(m => m.Username == loginDto.Username);
-		// TODO: Use password hash/function
-		if (user == null || user.Password != loginDto.Password)
+
+		if (user == null)
+		{
+			return Ok(new BaseResponseEmpty() { Success = false, Message = "Username or password is incorrect" });
+		}
+
+		bool validRres = await _userService.ValidateUser(user, loginDto);
+		if (!validRres)
 		{
 			return Ok(new BaseResponseEmpty() { Success = false, Message = "Username or password is incorrect" });
 		}

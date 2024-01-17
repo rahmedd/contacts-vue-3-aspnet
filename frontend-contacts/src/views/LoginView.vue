@@ -34,7 +34,8 @@ const rules = {
 	password: { isRequired },
 }
 
-const v$ = useVuelidate(rules, form)
+const $externalResults = ref({})
+const v$ = useVuelidate(rules, form, { $externalResults })
 
 const {
 	data: loginRes,
@@ -45,11 +46,10 @@ const {
 
 async function submitLogin(evt: Event) {
 	evt.preventDefault()
+	$externalResults.value = {}
 
 	try {
 		const vres = await v$.value.$validate()
-		// console.log(vres)
-
 		if (!vres) {
 			return
 		}
@@ -71,7 +71,7 @@ async function submitLogin(evt: Event) {
 
 		if (!res.success || !res.body) {
 			authStore.login(false, res.body)
-			// setFieldError('password', 'Incorrect username or password')
+			$externalResults.value = { password: 'Incorrect username or password' }
 			return
 		}
 		authStore.login(true, res.body)
