@@ -33,11 +33,11 @@ services:
     ports:
     - 3307:3306
 
-  proxy:
-    build: proxy
+  frontend-contacts:
+    build: frontend-contacts
     ports:
       - 80:80
-    depends_on: 
+    depends_on:
       - api
 
 volumes:
