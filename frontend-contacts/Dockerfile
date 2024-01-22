@@ -10,7 +10,7 @@ RUN npm install
 COPY ./ .
 RUN npm run build-only
 
-FROM nginx:1.13-alpine as production-stage
+FROM nginx:1.25-alpine as production-stage
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 # COPY --from=build-stage /app/dist /usr/share/nginx/html
 
