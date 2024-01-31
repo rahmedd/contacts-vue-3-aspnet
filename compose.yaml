@@ -35,13 +35,13 @@ services:
 
   frontend-contacts:
     build: frontend-contacts
-    ports:
-      - 80:80
-    depends_on:
-      - api
+    volumes:
+      # - ./frontend-contacts/dist:/dist
+      - vue-dist:/dist
 
 volumes:
   db-data:
+  vue-dist:
 
 secrets:
   db-password:
