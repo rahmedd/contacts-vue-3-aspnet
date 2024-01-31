@@ -10,6 +10,8 @@ services:
         condition: service_healthy
     environment:
       - ASPNETCORE_URLS=http://+:8000
+    networks:
+      - us-nginx_contacts-backend
 
   db:
     # We use a mariadb image which supports both amd64 & arm64 architecture
@@ -46,3 +48,7 @@ volumes:
 secrets:
   db-password:
     file: db/password.txt
+
+networks:
+  us-nginx_contacts-backend:
+    external: true
