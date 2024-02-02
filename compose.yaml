@@ -3,8 +3,8 @@ services:
     build:
       context: api
     restart: always
-    secrets:
-      - db-password
+    # secrets:
+    #   - db-password
     # depends_on:
     #   db:
     #     condition: service_healthy
@@ -22,9 +22,9 @@ services:
 volumes:
   vue-dist:
 
-secrets:
-  db-password:
-    file: db/password.txt
+# secrets:
+#   db-password:
+#     file: db/password.txt
 
 networks:
   contacts-backend:
