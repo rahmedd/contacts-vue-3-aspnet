@@ -12,10 +12,12 @@ services:
   frontend-contacts:
     build: frontend-contacts
     volumes:
-      - vue-dist:/dist
+      - contacts-dist:/dist
 
 volumes:
-  vue-dist:
+  contacts-dist:
+    name: contacts-dist
+    external: true
 
 networks:
   contacts-backend:
