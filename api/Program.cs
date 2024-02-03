@@ -5,8 +5,13 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using api.Authorization;
 using api.Services;
+using dotenv.net;
+
+
+DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: false));
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -42,7 +47,7 @@ builder.Services.AddScoped<ContactService>();
 builder.Services.AddScoped<UserService>();
 
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetValue<string>("DB_CONNECTION_STRING");
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
 	options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
