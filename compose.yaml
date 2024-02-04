@@ -8,6 +8,9 @@ services:
     networks:
       - contacts-backend
       - mydb
+    env_file:
+      - path: ./api/.env
+        required: true
 
   frontend-contacts:
     build: frontend-contacts

@@ -8,7 +8,7 @@ using api.Services;
 using dotenv.net;
 
 
-DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: false));
+DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: true));
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
