@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: api
+    restart: always
+    networks:
+      - contacts-backend
+      - mydb
+    environment:
+      - ASPNETCORE_URLS=http://+:8000
+    env_file:
+      - path: ./api/.env
+        required: true
+
+  frontend-contacts:
+    build: frontend-contacts
+    volumes:
+      - contacts-dist:/dist
+
+volumes:
+  contacts-dist:
+    name: contacts-dist
+    external: true
+
+networks:
+  contacts-backend:
+    external: true
+  mydb:
+    external: true
