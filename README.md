@@ -1,34 +1,52 @@
-## Compose application
+## Run development environment
 
+Required: \
+MySQL 8 or MariaDB 10\
+Visual Studio 2022 with ASP.NET and web development packages
 
-### ASP.NET server with an Nginx proxy and a MySQL database
-
-Project structure:
+### Create Database
 ```
-.
-├── api
-│   ├── Dockerfile
-│   ├── aspnet.csproj
-│   └── Program.cs
-├── db
-│   └── password.txt
-├── compose.yaml
-├── frontend-contacts
-│   ├── nginx.conf
-│   └── Dockerfile
-└── README.md
+CREATE DATABASE contactsnet;
 ```
 
-## Deploy with docker compose
+### Set .ENV file
+Within /api directory copy .env.example and set the DB connection string
 
+### Apply migrations
+Within /api directory run:
 ```
-$ docker compose up -d
+$ dotnet ef database update
 ```
 
-## Expected result
-After the application starts, navigate to `http://localhost:80` in your web browser:
+### Start API
+Start API using Visual Studio "Start Debugging" button
 
-Stop and remove the containers
+### Start web app
+Within /frontend-contacts run the following commands:
 ```
-$ docker compose down
+$ npm install
+$ npm run dev
 ```
+
+### Expected result
+After the application starts, navigate to `http://localhost:5173/register` in your web browser
+
+## Run in production
+1. Follow instructions in rahmedd/infra repo to setup base production environment and deploy
+
+2. Set production .env vars
+
+3. Create migration script using  ```dotnet ef migrations script -o ./init.sql```
+
+4. Configure DB using SSH \
+	a. Create database \
+	b. Run init.sql script on database
+
+5. Use docker contexts to deploy:
+```
+$ docker context create --docker "host=ssh://deployer@mydomain.test" prod
+$ docker context use prod
+$ docker compose up --build
+```
+### Expected Result 
+After the application starts, navigate to `http://mydomain.test` in your web browser
