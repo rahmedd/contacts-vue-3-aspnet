@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using api.Authorization;
 using api.Services;
 using dotenv.net;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 
 DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: true));
@@ -59,31 +61,14 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly()); //typeof(Mappin
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication();
+
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-	// Configure the HTTP request pipeline.
-	if (app.Environment.IsDevelopment())
-	{
-		app.UseDeveloperExceptionPage();
-		app.UseSwagger();
-		app.UseSwaggerUI();
-		try
-		{
-			//var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
-			// var seerderService = scope.ServiceProvider.GetService<DataSeeder>();
-			var dbContext = scope.ServiceProvider.GetService<AppDbContext>();
-			DataSeeder.Seed(dbContext);
-		}
-		catch (Exception ex)
-		{
-			var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-			logger.LogError(ex, "Error seeding the db. {exceptionMessage}", ex.Message);
-		}
-	}
-}
-
+	ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
