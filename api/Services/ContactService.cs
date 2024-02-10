@@ -3,7 +3,6 @@ using api.Models;
 using api.Models.DTOs;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace api.Services;
 
