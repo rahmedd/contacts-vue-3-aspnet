@@ -152,6 +152,19 @@ function updateCustomField(field: ContactCustomField) {
 	form.customFields[idx].fieldValue = field.fieldValue
 }
 
+function deleteCustomField(field: ContactCustomField) {
+	console.log(field)
+	const idx = form.customFields.findIndex(f => f.internalId === field.internalId)
+	console.log(idx)
+	if (idx < 0) {
+		console.log('deleteCustomField: field not found')
+		return
+	}
+	const spliced = form.customFields.splice(idx, 1)
+	console.log(spliced)
+	console.log(form.customFields)
+}
+
 const customFields = computed(() => 
 	form.customFields.filter(f => 
 		// Does not include
@@ -179,7 +192,7 @@ div.edit-contact-container
 			h1.title.is-4 Phone
 		div.row-split(v-for="field in phoneFields")
 			//- vuelidate subform
-			CustomField(:field="field" @update="updateCustomField" :simple="true")
+			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField" :simple="true")
 		div.row
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.PHONE)")
 				b New phone
@@ -189,7 +202,7 @@ div.edit-contact-container
 		div.row
 			h1.title.is-4 Email
 		div.row-split(v-for="field in emailFields")
-			CustomField(:field="field" @update="updateCustomField" :simple="true")
+			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField" :simple="true")
 		div.row
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.EMAIL)")
 				b New email
@@ -199,7 +212,7 @@ div.edit-contact-container
 		div.row
 			h1.title.is-4 Custom fields
 		div.row-split(v-for="field in customFields")
-			CustomField(:field="field" @update="updateCustomField")
+			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField")
 
 		div.row-split
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.TEXT)")
