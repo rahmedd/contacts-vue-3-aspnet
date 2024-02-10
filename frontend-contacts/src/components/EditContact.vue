@@ -152,6 +152,16 @@ function updateCustomField(field: ContactCustomField) {
 	form.customFields[idx].fieldValue = field.fieldValue
 }
 
+function deleteCustomField(field: ContactCustomField) {
+	const idx = form.customFields.findIndex(f => f.internalId === field.internalId)
+	if (idx < 0) {
+		console.log('deleteCustomField: field not found')
+		return
+	}
+
+	form.customFields.splice(idx, 1)
+}
+
 const customFields = computed(() => 
 	form.customFields.filter(f => 
 		// Does not include
@@ -177,9 +187,9 @@ div.edit-contact-container
 		hr
 		div.row
 			h1.title.is-4 Phone
-		div.row-split(v-for="field in phoneFields")
+		div.row-split(v-for="field in phoneFields" :key="field.internalId")
 			//- vuelidate subform
-			CustomField(:field="field" @update="updateCustomField" :simple="true")
+			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField" :simple="true")
 		div.row
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.PHONE)")
 				b New phone
@@ -188,8 +198,8 @@ div.edit-contact-container
 		hr
 		div.row
 			h1.title.is-4 Email
-		div.row-split(v-for="field in emailFields")
-			CustomField(:field="field" @update="updateCustomField" :simple="true")
+		div.row-split(v-for="field in emailFields" :key="field.internalId")
+			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField" :simple="true")
 		div.row
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.EMAIL)")
 				b New email
@@ -198,8 +208,8 @@ div.edit-contact-container
 		hr
 		div.row
 			h1.title.is-4 Custom fields
-		div.row-split(v-for="field in customFields")
-			CustomField(:field="field" @update="updateCustomField")
+		div.row-split(v-for="field in customFields" :key="field.internalId")
+			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField")
 
 		div.row-split
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.TEXT)")

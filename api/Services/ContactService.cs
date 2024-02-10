@@ -26,7 +26,9 @@ public class ContactService
 			throw new Exception("Contact not found");
 		}
 
-		contact.Firstname = contactDto.Firstname;
+        List<int> reqFieldIds = contactDto.CustomFields.Select(o => o.Id).ToList();
+
+        contact.Firstname = contactDto.Firstname;
 		contact.Lastname = contactDto.Lastname;
 
 		// Update fields
@@ -56,7 +58,17 @@ public class ContactService
 			contact.CustomFields.Add(customField);
 		}
 
-		await _context.SaveChangesAsync();
+        // Delete fields
+        foreach (ContactCustomField field in contact.CustomFields)
+        {
+            if (!reqFieldIds.Contains(field.Id))
+            {
+                var cf = _context.ContactCustomFields.First(x => x.Id == field.Id && x.Contact.Id == contact.Id);
+                _context.ContactCustomFields.Remove(cf);
+            }
+        }
+
+        await _context.SaveChangesAsync();
 		ContactDto contactRes = _mapper.Map<ContactDto>(contact);
 
 		return contactRes;
