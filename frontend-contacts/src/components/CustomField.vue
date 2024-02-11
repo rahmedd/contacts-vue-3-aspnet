@@ -133,7 +133,7 @@ div.field-row
 			div
 				BButton.is-rounded.is-large.del(:type="BloomaTypes.Ghost" @click="deleteField")
 					span.icon
-						Icon(icon="typcn:delete" width="30")
+						Icon(icon="iconoir:delete-circle" width="26")
 
 </template>
 
@@ -144,28 +144,13 @@ div.field-row
 $field-gap: 10px;
 
 .field-row {
-	display: flex;
-}
-
-.field {
-	width: 240px;
-}
-
-.field-small {
-	width: 125px;
-}
-
-.field, .field-small:not(:last-child) {
-	margin-right: $field-gap;
-}
-
-
-.fake-field:has(.input.is-small) {
-	height: 75px;
-}
-
-.fake-field:has(.input.is-default) {
-	height: 85px;
+	display: grid; 
+	grid-auto-columns: 1fr;
+	gap: 0px $field-gap; 
+	grid-template-areas: 
+		". . . ."; 
+	height: 50%; 
+	width: 100%;
 }
 
 .label {
