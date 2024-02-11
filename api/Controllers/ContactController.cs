@@ -83,13 +83,6 @@ public class ContactController : ControllerBase
 
 	}
 
-    // PUT api/<ContactsController>/5
- //   [Authorize]
- //   [HttpPut("{id}")]
-	//public void Put(int id, [FromBody] string value)
-	//{
-	//}
-
 	[Authorize]
 	[HttpPut]
 	public async Task<ActionResult<BaseResponse<ContactDto>>> Put([FromBody] ContactRequestDto contactReq)
@@ -114,7 +107,20 @@ public class ContactController : ControllerBase
 	// DELETE api/<ContactsController>/5
 	[Authorize]
     [HttpDelete("{id}")]
-	public void Delete(int id)
-	{
-	}
+    public async Task<ActionResult<BaseResponseEmpty>> Delete(int id)
+    {
+        User user = await _userService.GetUserByUsernameAsync(LoggedInUser);
+        Contact contactDto = await _contactService.DeleteContactAsync(user, id);
+
+		var res = new BaseResponseEmpty();
+
+        if (contactDto == null)
+        {
+            res.Success = false;
+            return NotFound(res);
+        }
+
+        return res;
+
+    }
 }

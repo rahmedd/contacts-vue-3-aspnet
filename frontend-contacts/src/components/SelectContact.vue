@@ -44,7 +44,7 @@ const sortedContacts = computed(() => {
 
 <template lang="pug">
 div
-	div(v-for="contact in sortedContacts")
+	div(v-for="contact in sortedContacts" :key="contact.id")
 		BButton(
 			:type="BloomaTypes.Primary"
 			:light="contact.id !== selected"

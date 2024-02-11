@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import apiClient from '@/services/axios'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
-import { useCreateContact, useUpdateContact } from '@/composables/ContactMethods'
+import { useCreateContact, useUpdateContact, useDeleteContact } from '@/composables/ContactMethods'
 
 // blooma
 import { BloomaSizes } from '@/blooma/enums/BloomaSizes'
@@ -65,8 +65,9 @@ const deleteModal = ref<boolean>(false)
 
 const { action: updateContact } = useUpdateContact()
 const { action: createContact } = useCreateContact()
+const { action: deleteContact } = useDeleteContact()
 
-// used for new contact
+// used for new contact selection and delete contact unselect on SelectContact component
 function updateContactId(id: number) {
 	emits('updateId', id)
 }
@@ -115,8 +116,17 @@ async function saveContact() {
 	updateMode(EditContactModes.VIEW)
 }
 
-async function deleteContact(id: number) {
-	// action
+async function deleteCt() {
+	try {
+		const res = await deleteContact(form.id)
+		updateContactId(0)
+	}
+	catch (ex)
+	{
+		console.log(ex)
+		console.log('deleteContact error')
+	}
+
 	deleteModal.value = false
 }
 
@@ -264,7 +274,7 @@ div.edit-contact-container
 						template(v-slot:content)
 							span Are you sure you want to delete {{ form.firstname }}'s contact?
 						template(v-slot:footer)
-							BButton(:type="BloomaTypes.Danger" @click="deleteContact") Delete
+							BButton(:type="BloomaTypes.Danger" @click="deleteCt") Delete
 							BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
 </template>
 

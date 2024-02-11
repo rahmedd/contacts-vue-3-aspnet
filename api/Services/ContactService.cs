@@ -114,7 +114,40 @@ public class ContactService
 		return contactRes;
 	}
 
-	public async Task<List<ContactsGetDto>> GetContactsAsync(User user)
+    private async Task<Contact> GetContactAsync(User user, int contactId)
+    {
+        var contactsQuery = _context.Contacts
+            .Where(c => c.Users
+                .Any(u => u.Id == user.Id)
+            //.Any(u => u.Id == user.Id && u.Contacts.Any(c => c.Id == contactId)
+            )
+            .Where(c => c.Id == contactId)
+            .Include(c => c.Users)
+            .Include(c => c.CustomFields);
+
+        var contact = await contactsQuery.FirstOrDefaultAsync();
+
+        return contact;
+    }
+
+    public async Task<Contact> DeleteContactAsync(User user, int contactId)
+    {
+		var contact = await GetContactAsync(user, contactId);
+		_context.Contacts.Remove(contact);
+        await _context.SaveChangesAsync();
+
+        return contact;
+    }
+
+    public async Task<ContactDto> GetContactDtoAsync(User user, int contactId)
+    {
+        Contact contact = await GetContactAsync(user, contactId);
+        ContactDto contactDto = _mapper.Map<ContactDto>(contact);
+
+        return contactDto;
+    }
+
+    public async Task<List<ContactsGetDto>> GetContactsAsync(User user)
 	{
 		var contactsQuery = _context.Contacts
 			.Where(c => c.Users
@@ -172,29 +205,5 @@ public class ContactService
 			.ToListAsync();
 
 		return contacts;
-	}
-
-	private async Task<Contact> GetContactAsync(User user, int contactId)
-	{
-		var contactsQuery = _context.Contacts
-			.Where(c => c.Users
-				.Any(u => u.Id == user.Id)
-			//.Any(u => u.Id == user.Id && u.Contacts.Any(c => c.Id == contactId)
-			)
-			.Where(c => c.Id == contactId)
-			.Include(c => c.Users)
-			.Include(c => c.CustomFields);
-
-		var contact = await contactsQuery.FirstOrDefaultAsync();
-
-		return contact;
-	}
-
-	public async Task<ContactDto> GetContactDtoAsync(User user, int contactId)
-	{
-		Contact contact = await GetContactAsync(user, contactId);
-		ContactDto contactDto = _mapper.Map<ContactDto>(contact);
-
-		return contactDto;
 	}
 }

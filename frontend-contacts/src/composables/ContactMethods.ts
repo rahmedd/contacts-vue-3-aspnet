@@ -148,6 +148,38 @@ ComposeResult<
 	}
 }
 
+export function useDeleteContact():
+	ComposeResult<
+		null,
+		number,
+		void
+	> {
+	const contact = ref<null>(null)
+	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
+	const error = ref<any | null>(null)
+
+	async function deleteContact(id: number) {
+		try {
+			state.value = ComposeResultState.LOADING
+
+			const res: AxiosResponse<BaseReponse<null>> = await apiClient.delete(`Contact/${id}`)
+			// contact.value = res.data.body
+
+			state.value = ComposeResultState.SUCCESS
+		}
+		catch (ex) {
+			console.log(ex)
+			state.value = ComposeResultState.FAILURE
+		}
+	}
+
+	return {
+		state: state,
+		data: contact,
+		action: deleteContact
+	}
+}
+
 // adds internal id used for tracking custom fields in vee-validate
 export function contactToContactInternal(ct: ContactResponse): ContactResponse {
 	const contact = new ContactResponse(
