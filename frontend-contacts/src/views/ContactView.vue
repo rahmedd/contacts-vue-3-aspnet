@@ -15,7 +15,6 @@ import { ContactSearchModes } from '@/enums/ContactSearchModes'
 
 // components
 import BButton from '@/blooma/BButton.vue'
-import BInput from '@/blooma/BInput.vue'
 import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
@@ -157,7 +156,6 @@ div.contact-container
 				@unselect="unselectContact"
 			)
 			h1(v-else)
-			//- h1(v-else) Select a contact
 </template>
 
 <style lang="scss" scoped>

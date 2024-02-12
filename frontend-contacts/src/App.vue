@@ -4,7 +4,7 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-	<RouterView />
+	<RouterView class="app-background" />
 </template>
 
 <style lang="scss">
@@ -22,5 +22,9 @@ import { RouterLink, RouterView } from 'vue-router'
   background-color: gainsboro;    /* color of the scroll thumb */
   border-radius: 4px;       /* roundness of the scroll thumb */
   border: none;
+}
+
+.app-background {
+	background: $bl-background;
 }
 </style>

@@ -33,4 +33,11 @@ Teleport(to="body")
 @import '@/blooma/vars.scss';
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
+// fullscreen modal
+// @media screen and (max-width: $tablet) {
+// 	.modal-card {
+// 		height: 100vh;
+// 		max-height: 100vh;
+// 	}
+// }
 </style>

@@ -1,3 +1,4 @@
+import hexoid from 'hexoid';
 import type { ContactCustomFieldTypes } from "@/enums/ContactCustomFieldTypes"
 
 export class ContactCustomField {
@@ -8,7 +9,7 @@ export class ContactCustomField {
 	fieldType: ContactCustomFieldTypes
 
 	constructor(id: number, fieldName: string, fieldValue: string, fieldType: ContactCustomFieldTypes) {
-		this.internalId = self.crypto.randomUUID()
+		this.internalId = hexoid(32)()
 		this.id = id
 		this.fieldName = fieldName
 		this.fieldType = fieldType

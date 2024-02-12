@@ -189,11 +189,14 @@ const customFields = computed(() =>
 )
 const emailFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.EMAIL))
 const phoneFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.PHONE))
+
+// document.body.requestFullscreen() // It works, but I don't like how annoying it is.
 </script>
 
 <template lang="pug">
 div.edit-contact-container
 	BForm.contact-form(v-if="mode === EditContactModes.EDIT" @input="editContact" :loading="false")
+		div.row.label &nbsp;
 		div.row
 			h1.title.is-4 Name
 		div.row-split
@@ -272,17 +275,17 @@ div.edit-contact-container
 			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Default" @click="cancelEdit") Cancel
 			BButton(v-else :type="BloomaTypes.Default" @click="unselectContact") Back
 		.button-bar-right
-			BButton(v-if="props.contact.id !== 0" :type="BloomaTypes.Danger" @click="toggleDeleteModal")
+			BButton(v-if="mode === EditContactModes.VIEW && props.contact.id !== 0" :type="BloomaTypes.Danger" @click="toggleDeleteModal")
 				span.icon
 					Icon(icon="mdi:trash" height="22")
-					BModal(v-if="deleteModal")
-						template(v-slot:header)
-							p.modal-card-title Delete {{ form.firstname }}?
-						template(v-slot:content)
-							span Are you sure you want to delete {{ form.firstname }}'s contact?
-						template(v-slot:footer)
-							BButton(:type="BloomaTypes.Danger" @click="deleteCt") Delete
-							BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
+				BModal(v-if="deleteModal")
+					template(v-slot:header)
+						p.modal-card-title Delete {{ form.firstname }}?
+					template(v-slot:content)
+						span Are you sure you want to delete {{ form.firstname }}'s contact?
+					template(v-slot:footer)
+						BButton(:type="BloomaTypes.Danger" @click="deleteCt") Delete
+						BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
 </template>
 
 <style lang="scss" scoped>
@@ -359,6 +362,10 @@ $gap: 20px;
 	margin-right: $gap;
 }
 
+#container::backdrop {
+    background-color: #ffffff00;
+}
+
 @media screen and (max-width: $tablet) {
 	$gap: 10px;
 	.row-split {
@@ -370,6 +377,10 @@ $gap: 20px;
 		margin-left: $gap;
 		margin-right: $gap;
 		margin-bottom: $gap;
+	}
+
+	.modal-card{
+		height: 100vh;
 	}
 }
 </style>
