@@ -115,8 +115,8 @@ div.field-row
 			:modelValue="form.fieldValue"
 			@update:modelValue="updateFieldValue"
 		)
-	div.field-small(v-if="!simple")
-		BSelect.field-small(
+	div(v-if="!simple")
+		BSelect(
 			placeholder="Type"
 			name="fieldtype"
 			:mode="BloomaValidationModes.Aggressive"
@@ -128,12 +128,14 @@ div.field-row
 			@update:modelValue="updateFieldType"
 		)
 	div.field
-		.fake-field.field-small
-			label.label &nbsp;
-			div
-				BButton.is-rounded.is-large.del(:type="BloomaTypes.Ghost" @click="deleteField")
+		div
+			label.label.dummy-label &nbsp;
+			div.del-container
+				BButton.is-rounded.is-large.del-btn(:type="BloomaTypes.Ghost" @click="deleteField")
 					span.icon
 						Icon(icon="iconoir:delete-circle" width="26")
+			div.hr
+				hr
 
 </template>
 
@@ -146,10 +148,9 @@ $field-gap: 10px;
 .field-row {
 	display: grid; 
 	grid-auto-columns: 1fr;
-	gap: 0px $field-gap; 
-	grid-template-areas: 
-		". . . ."; 
-	height: 50%; 
+	grid-auto-flow: column;
+	gap: 0px $field-gap;
+	height: 100%; 
 	width: 100%;
 }
 
@@ -160,28 +161,53 @@ $field-gap: 10px;
 	color: #03363e;
 }
 
-.del.button > .icon {
+.del-container {
+	display: flex;
+	justify-content: start;
+	align-items: center;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.del-btn.button > .icon {
 	color: $red;
 }
 
-.del.button {
+.del-btn.button {
 	padding: 0;
-	margin-left: $field-gap;
+	// margin-left: $field-gap;
 	height: auto;
 }
 
-.del.button:focus {
+.del-btn.button:focus {
 	box-shadow: none;
 }
-.del.button:hover {
+.del-btn.button:hover {
 	box-shadow: none;
 }
 
+.hr {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	hr {
+		width: 100%;
+		height: 1px;
+	}
+}
 
 @media screen and (max-width: $tablet) {
 	.field-row {
-		grid-auto-columns: auto;
-		gap: 0px calc($field-gap / 2); 
+		grid-auto-flow: row;
+	}
+
+	.del-container {
+		justify-content: center;
+	}
+
+	.dummy-label {
+		display: none;
 	}
 }
 </style>
