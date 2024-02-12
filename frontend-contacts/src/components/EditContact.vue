@@ -313,7 +313,7 @@ $gap: 20px;
 }
 
 .field {
-	width: 250px;
+	max-width: 250px;
 }
 .field:not(:last-child) {
 	margin-right: 10px;
@@ -353,8 +353,16 @@ $gap: 20px;
 }
 
 @media screen and (max-width: $tablet) {
-	.button-bar {
-		flex-direction: column;
+	$gap: 10px;
+	.row-split {
+		margin-left: $gap;
+		margin-right: $gap;
+	}
+
+	.row {
+		margin-left: $gap;
+		margin-right: $gap;
+		margin-bottom: $gap;
 	}
 }
 </style>

@@ -177,4 +177,11 @@ $field-gap: 10px;
 	box-shadow: none;
 }
 
+
+@media screen and (max-width: $tablet) {
+	.field-row {
+		grid-auto-columns: auto;
+		gap: 0px calc($field-gap / 2); 
+	}
+}
 </style>

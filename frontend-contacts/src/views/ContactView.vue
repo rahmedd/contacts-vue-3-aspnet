@@ -107,7 +107,7 @@ onMounted(async () => {
 
 <template lang="pug">
 div.contact-container
-	div.contact-layout
+	div.contact-layout(:class="contact && renderContact ? 'viewing' : ''")
 		div.new-container
 			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="createContact") +
 		div.search-container
@@ -152,8 +152,9 @@ div.contact-container
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
 .contact-container {
-	// display: block;
-	// height: 100vh;
+	display: block;
+	height: 100vh;
+	width: 100vh;
 }
 
 .contact-layout {
@@ -165,7 +166,7 @@ div.contact-container
 	// grid-template-areas:
 	// 	". . ."
 	// 	". . .";
-	height: 100vh;
+	height: 100%;
 }
 
 .new-container {
@@ -215,4 +216,29 @@ div.contact-container
 	margin-left: 16px;
 }
 
+
+@media screen and (max-width: $tablet) {
+	.contact-container {
+		height: 100vh;
+		width: 100%;
+	}
+	.contact-layout {
+		grid-template-columns: 1fr 6fr 0fr;
+		grid-template-rows: 60px 1fr;
+	}
+	.contact-layout.viewing {
+		// display: block;
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr;
+
+		.new-container, .alphabet-container, .search-container, .contact-select-container, .end-nav-container {
+			display: none;
+		}
+	}
+
+	.new-container {
+		padding: 10px;
+		padding-left: 8px;
+	}
+}
 </style>
