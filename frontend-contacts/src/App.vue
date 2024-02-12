@@ -25,6 +25,6 @@ import { RouterLink, RouterView } from 'vue-router'
 }
 
 .app-background {
-	background: $bl-background;
+	background: $bl-app-background;
 }
 </style>
