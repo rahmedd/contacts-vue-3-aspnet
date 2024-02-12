@@ -134,8 +134,6 @@ div.field-row
 				BButton.is-rounded.is-large.del-btn(:type="BloomaTypes.Ghost" @click="deleteField")
 					span.icon
 						Icon(icon="iconoir:delete-circle" width="26")
-			div.hr
-				hr
 
 </template>
 
@@ -184,17 +182,6 @@ $field-gap: 10px;
 }
 .del-btn.button:hover {
 	box-shadow: none;
-}
-
-.hr {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	hr {
-		width: 100%;
-		height: 1px;
-	}
 }
 
 @media screen and (max-width: $tablet) {

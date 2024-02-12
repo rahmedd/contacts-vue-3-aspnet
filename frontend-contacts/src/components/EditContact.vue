@@ -371,8 +371,10 @@ $gap: 20px;
 @media screen and (max-width: $tablet) {
 	$gap: 15px;
 	.row-split {
-		margin-left: $gap;
-		margin-right: $gap;
+		margin: $gap;
+		padding: $gap;
+		outline: 1px solid $bl-primary-light;
+		border-radius: 4px;
 	}
 
 	.row {
