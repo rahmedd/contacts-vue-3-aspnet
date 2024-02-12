@@ -57,19 +57,31 @@ async function selectAndGetContact(id: number) {
 
 	selected.value = id
 
-	// if new contact
-	if (id === 0) {
+	// no contact
+	if (id === -1) {
+		contact.value = null
+		return		
+	}
+	// new contact
+	else if (id === 0) {
 		contact.value = new Contact(0, '', '', [])
 		return
 	}
+	// existing contact
+	else {
+		try {
+			await getContact(id)
+		}
+		catch (ex) {
+			// TODO: toast error
+			console.log(ex)
+		}
+	}
+}
 
-	try {
-		await getContact(id)
-	}
-	catch (ex) {
-		// TODO: toast error
-		console.log(ex)
-	}
+async function unselectContact() {
+	await selectAndGetContact(-1)
+	updateMode(EditContactModes.VIEW)
 }
 
 async function createContact() {
@@ -142,6 +154,7 @@ div.contact-container
 				@updateMode="updateMode"
 				@resetForm="resetForm"
 				@updateId="refreshContactsAndSelect"
+				@unselect="unselectContact"
 			)
 			h1(v-else)
 			//- h1(v-else) Select a contact

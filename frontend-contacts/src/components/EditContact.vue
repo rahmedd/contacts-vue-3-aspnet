@@ -43,6 +43,7 @@ const emits = defineEmits<{
 	updateId: [id: number],
 	updateMode: [mode: EditContactModes],
 	resetForm: [],
+	unselect: [],
 }>()
 
 const form = reactive(
@@ -85,6 +86,11 @@ function cancelEdit() {
 	emits('resetForm')
 }
 
+function unselectContact() {
+	updateMode(EditContactModes.VIEW)
+	emits('unselect')
+}
+
 async function saveContact() {
 	const res = await v$.value.$validate()
 	if (!res) {
@@ -119,7 +125,7 @@ async function saveContact() {
 async function deleteCt() {
 	try {
 		const res = await deleteContact(form.id)
-		updateContactId(0)
+		updateContactId(-1)
 	}
 	catch (ex)
 	{
@@ -264,6 +270,7 @@ div.edit-contact-container
 			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Primary" @click="saveContact") Save
 			BButton(v-else :type="BloomaTypes.Primary" @click="editContact") Edit
 			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Default" @click="cancelEdit") Cancel
+			BButton(v-else :type="BloomaTypes.Default" @click="unselectContact") Back
 		.button-bar-right
 			BButton(v-if="props.contact.id !== 0" :type="BloomaTypes.Danger" @click="toggleDeleteModal")
 				span.icon
