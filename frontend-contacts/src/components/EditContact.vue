@@ -101,7 +101,7 @@ async function saveContact() {
 		// creating a new contact
 		if (props.contact.id === 0) {
 			const createRes = await createContact(form)
-			
+
 			// Selected contact can change on creation of new contact or delete contact
 			updateContactId(createRes!.id)
 		}
@@ -109,9 +109,10 @@ async function saveContact() {
 		// updating a contact
 		else {
 			const updateRes = await updateContact(form)
-			if (updateRes) {
-				// emits('updateContact', updateRes)
-			}
+			updateContactId(updateRes!.id)
+			// if (updateRes) {
+			// 	emits('updateContact', updateRes)
+			// }
 		}
 	}
 	catch (ex) {
