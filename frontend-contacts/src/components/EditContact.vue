@@ -189,8 +189,6 @@ const customFields = computed(() =>
 )
 const emailFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.EMAIL))
 const phoneFields = computed(() => form.customFields.filter(f => f.fieldType === ContactCustomFieldTypes.PHONE))
-
-// document.body.requestFullscreen() // It works, but I don't like how annoying it is.
 </script>
 
 <template lang="pug">

@@ -14,11 +14,13 @@ import { Contact } from '@/requestTypes/Contact'
 import { ContactSearchModes } from '@/enums/ContactSearchModes'
 
 // components
+import { Icon } from '@iconify/vue'
 import BButton from '@/blooma/BButton.vue'
 import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
 import SearchContact from '@/components/SearchContact.vue'
+import BModal from '@/blooma/BModal.vue'
 
 const authStore = useAuthStore()
 
@@ -39,6 +41,18 @@ const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
 const searchQuery = ref<string>('')
 const searchMode = ref<ContactSearchModes>(ContactSearchModes.ALL)
 const renderContact = ref(true) // TODO: remove this hack
+const settingsModal = ref(false)
+
+function toggleSettings() {
+	settingsModal.value = !settingsModal.value
+	if (settingsModal.value) {
+		document.exitFullscreen()
+	}
+	else {
+		document.body.requestFullscreen()
+	}
+
+}
 
 function updateMode(mode: EditContactModes) {
 	viewMode.value = mode
@@ -129,7 +143,20 @@ div.contact-container
 				@update:searchMode="updateSearchMode"
 			)
 		div.end-nav-container
-			//- p hello3
+			BButton.settings-btn(:type="BloomaTypes.Ghost" :light="true" @click="toggleSettings")
+				span.icon
+					//- Icon(icon="material-symbols:settings" width="22")
+					Icon(icon="material-symbols:fullscreen" width="22")
+				//- BModal(v-if="settingsModal")
+				//- 	template(v-slot:header)
+				//- 		p.modal-card-title Settings
+				//- 	template(v-slot:content)
+				//- 		div
+				//- 			BButton Toggle dark mode
+				//- 		div
+				//- 			BButton Enable fullscreen
+				//- 	template(v-slot:footer)
+				//- 		BButton(:type="BloomaTypes.Default" @click="") Close
 		div.alphabet-container.scrollable
 			Alphabet(
 				v-model="searchQuery"
@@ -194,6 +221,12 @@ div.contact-container
 	}
 }
 
+.end-nav-container {
+	padding: 10px;
+	display: flex;
+	justify-content: end;
+}
+
 .new-contact-btn {
 	width: 100%;
 }
@@ -223,16 +256,25 @@ div.contact-container
 	margin-left: 16px;
 }
 
-
 @media screen and (max-width: $tablet) {
 	.contact-container {
 		height: 100vh;
 		width: 100%;
 	}
 	.contact-layout {
-		grid-template-columns: 1fr 6fr 0fr;
+		grid-template-columns: 1fr 6fr 1fr;
 		grid-template-rows: 60px 1fr;
 	}
+
+	.contact-select-container {
+		grid-area: 2 / 2 / 3 / 4;
+	}
+
+	.end-nav-container {
+		// justify-content: start;
+		padding-left: 0px;
+	}
+
 	.contact-layout.viewing {
 		// display: block;
 		grid-template-columns: 1fr;
