@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers, minLength } from '@vuelidate/validators'
 import { customValidatorBase } from '@/validation/customValidatorBase'
+import { containsNumber, containsUpper, containsLower } from '@/validation/signupValidators'
 
 import type BaseReponse from '@/responseTypes/BaseResponse'
 import type LoginResponse from '@/responseTypes/LoginResponse'
@@ -31,6 +32,7 @@ const form = reactive<SignupRequest>({
 })
 
 const isRequired = helpers.withMessage('Required', required)
+// const asyncValidator = helpers.withAsync(customValidatorBase(containsNumber), () => props.field.fieldType)
 const rules = {
 	username: {
 		isRequired,
@@ -45,9 +47,15 @@ const rules = {
 		// 	}) => `This field has a value of '${$model}' but must have a min length of ${JSON.stringify($params)} so it is ${$invalid ? 'invalid' : 'valid'}`,
 		// 	helpers.withAsync(async () => ({ $message: 'please work' }))
 		// )
-		unique: customValidatorBase(checkUsernameCached)
+		unique: customValidatorBase(checkUsernameCached),
 	},
-	password: { isRequired },
+	password: {
+		isRequired,
+		minLength: minLength(6),
+		hasUpper: helpers.withAsync(customValidatorBase(containsUpper)),
+		hasLower: helpers.withAsync(customValidatorBase(containsLower)),
+		hasNumber: helpers.withAsync(customValidatorBase(containsNumber)),
+	},
 	confirmPassword: { isRequired },
 }
 

@@ -7,4 +7,5 @@ RUN npm run build-only
 # FROM node:21-alpine as production-stage
 FROM nginx:1.25-alpine as production-stage
 ADD https://google.com cache_bust
+# ARG $RANDOM
 COPY --from=build-stage /app/dist /dist
