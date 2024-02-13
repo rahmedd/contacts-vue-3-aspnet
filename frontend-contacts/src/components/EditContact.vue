@@ -43,6 +43,7 @@ const emits = defineEmits<{
 	updateId: [id: number],
 	updateMode: [mode: EditContactModes],
 	resetForm: [],
+	unselect: [],
 }>()
 
 const form = reactive(
@@ -85,6 +86,11 @@ function cancelEdit() {
 	emits('resetForm')
 }
 
+function unselectContact() {
+	updateMode(EditContactModes.VIEW)
+	emits('unselect')
+}
+
 async function saveContact() {
 	const res = await v$.value.$validate()
 	if (!res) {
@@ -119,7 +125,7 @@ async function saveContact() {
 async function deleteCt() {
 	try {
 		const res = await deleteContact(form.id)
-		updateContactId(0)
+		updateContactId(-1)
 	}
 	catch (ex)
 	{
@@ -187,7 +193,8 @@ const phoneFields = computed(() => form.customFields.filter(f => f.fieldType ===
 
 <template lang="pug">
 div.edit-contact-container
-	BForm.contact-form(v-if="mode === EditContactModes.EDIT" @input="editContact" :loading="false")
+	BForm.contact-form.scrollable(v-if="mode === EditContactModes.EDIT" @input="editContact" :loading="false")
+		div.row.label &nbsp;
 		div.row
 			h1.title.is-4 Name
 		div.row-split
@@ -221,12 +228,12 @@ div.edit-contact-container
 		div.row-split(v-for="field in customFields" :key="field.internalId")
 			CustomField(:field="field" @update="updateCustomField" @delete="deleteCustomField")
 
-		div.row-split
+		div.row
 			BButton.add-field(:type="BloomaTypes.Primary" :light="true" @click="() => createCustomField(ContactCustomFieldTypes.TEXT)")
 				b New custom field
 				Icon(icon="ci:add-row" height="24")
 
-	div.contact-form(v-else)
+	div.contact-form.scrollable(v-else)
 		div.row.label &nbsp;
 		div.row
 			h1.title.is-4 {{ form.firstname }} {{ form.lastname }}
@@ -264,18 +271,19 @@ div.edit-contact-container
 			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Primary" @click="saveContact") Save
 			BButton(v-else :type="BloomaTypes.Primary" @click="editContact") Edit
 			BButton(v-if="mode === EditContactModes.EDIT" :type="BloomaTypes.Default" @click="cancelEdit") Cancel
+			BButton(v-else :type="BloomaTypes.Default" @click="unselectContact") Close
 		.button-bar-right
-			BButton(v-if="props.contact.id !== 0" :type="BloomaTypes.Danger" @click="toggleDeleteModal")
+			BButton(v-if="mode === EditContactModes.VIEW && props.contact.id !== 0" :type="BloomaTypes.Danger" @click="toggleDeleteModal")
 				span.icon
 					Icon(icon="mdi:trash" height="22")
-					BModal(v-if="deleteModal")
-						template(v-slot:header)
-							p.modal-card-title Delete {{ form.firstname }}?
-						template(v-slot:content)
-							span Are you sure you want to delete {{ form.firstname }}'s contact?
-						template(v-slot:footer)
-							BButton(:type="BloomaTypes.Danger" @click="deleteCt") Delete
-							BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
+				BModal(v-if="deleteModal")
+					template(v-slot:header)
+						p.modal-card-title Delete {{ form.firstname }}?
+					template(v-slot:content)
+						span Are you sure you want to delete {{ form.firstname }}'s contact?
+					template(v-slot:footer)
+						BButton(:type="BloomaTypes.Danger" @click="deleteCt") Delete
+						BButton(:type="BloomaTypes.Default" @click="toggleDeleteModal") Cancel
 </template>
 
 <style lang="scss" scoped>
@@ -285,12 +293,10 @@ div.edit-contact-container
 $gap: 20px;
 .edit-contact-container {
 	display: grid;
-	grid-template-columns: 1fr;
-	grid-template-rows: 1fr auto;
+	// grid-auto-columns: 1fr;
+	// grid-auto-rows: 400px 100px;
+	grid-auto-rows: 1fr auto;
 	gap: 0px 0px; 
-	grid-template-areas: 
-		"."
-		".";
 	height: 100%;
 }
 
@@ -313,7 +319,7 @@ $gap: 20px;
 }
 
 .field {
-	width: 250px;
+	max-width: 250px;
 }
 .field:not(:last-child) {
 	margin-right: 10px;
@@ -352,9 +358,27 @@ $gap: 20px;
 	margin-right: $gap;
 }
 
+#container::backdrop {
+    background-color: #ffffff00;
+}
+
+.scrollable {
+	overflow-y: scroll;
+}
+
 @media screen and (max-width: $tablet) {
-	.button-bar {
-		flex-direction: column;
+	$gap: 15px;
+	.row-split {
+		margin: $gap;
+		padding: $gap;
+		outline: 1px solid $bl-primary-light;
+		border-radius: 4px;
+	}
+
+	.row {
+		margin-left: $gap;
+		margin-right: $gap;
+		margin-bottom: $gap;
 	}
 }
 </style>

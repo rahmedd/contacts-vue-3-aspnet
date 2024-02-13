@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // lib
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth'
 import { useGetContact, useGetContacts } from '@/composables/ContactMethods';
 
@@ -14,8 +14,8 @@ import { Contact } from '@/requestTypes/Contact'
 import { ContactSearchModes } from '@/enums/ContactSearchModes'
 
 // components
+import { Icon } from '@iconify/vue'
 import BButton from '@/blooma/BButton.vue'
-import BInput from '@/blooma/BInput.vue'
 import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
@@ -41,6 +41,16 @@ const searchQuery = ref<string>('')
 const searchMode = ref<ContactSearchModes>(ContactSearchModes.ALL)
 const renderContact = ref(true) // TODO: remove this hack
 
+function togglefullscreen() {
+	if (document.fullscreenElement != null) {
+		document.exitFullscreen()
+	}
+	else {
+		document.body.requestFullscreen()
+	}
+
+}
+
 function updateMode(mode: EditContactModes) {
 	viewMode.value = mode
 }
@@ -57,19 +67,31 @@ async function selectAndGetContact(id: number) {
 
 	selected.value = id
 
-	// if new contact
-	if (id === 0) {
+	// no contact
+	if (id === -1) {
+		contact.value = null
+		return		
+	}
+	// new contact
+	else if (id === 0) {
 		contact.value = new Contact(0, '', '', [])
 		return
 	}
+	// existing contact
+	else {
+		try {
+			await getContact(id)
+		}
+		catch (ex) {
+			// TODO: toast error
+			console.log(ex)
+		}
+	}
+}
 
-	try {
-		await getContact(id)
-	}
-	catch (ex) {
-		// TODO: toast error
-		console.log(ex)
-	}
+async function unselectContact() {
+	await selectAndGetContact(-1)
+	updateMode(EditContactModes.VIEW)
 }
 
 async function createContact() {
@@ -99,6 +121,8 @@ async function refreshContactsAndSelect(id: number) {
 	await selectAndGetContact(id)
 }
 
+const hasContactAndShouldRender = computed(() => contact.value && renderContact.value)
+
 onMounted(async () => {
 	await getContacts()
 })
@@ -107,7 +131,7 @@ onMounted(async () => {
 
 <template lang="pug">
 div.contact-container
-	div.contact-layout
+	div.contact-layout(:class="hasContactAndShouldRender ? 'viewing' : ''")
 		div.new-container
 			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="createContact") +
 		div.search-container
@@ -118,7 +142,9 @@ div.contact-container
 				@update:searchMode="updateSearchMode"
 			)
 		div.end-nav-container
-			//- p hello3
+			BButton.settings-btn(:type="BloomaTypes.Ghost" :light="true" @click="togglefullscreen")
+				span.icon
+					Icon(icon="material-symbols:fullscreen" width="22")
 		div.alphabet-container.scrollable
 			Alphabet(
 				v-model="searchQuery"
@@ -135,16 +161,16 @@ div.contact-container
 			)
 		div.contact-view-container.scrollable
 			EditContact(
-				v-if="contact && renderContact"
+				v-if="contact && hasContactAndShouldRender"
 				:key="contact.id"
 				:contact="contact"
 				:mode="viewMode"
 				@updateMode="updateMode"
 				@resetForm="resetForm"
 				@updateId="refreshContactsAndSelect"
+				@unselect="unselectContact"
 			)
 			h1(v-else)
-			//- h1(v-else) Select a contact
 </template>
 
 <style lang="scss" scoped>
@@ -152,8 +178,9 @@ div.contact-container
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 
 .contact-container {
-	// display: block;
-	// height: 100vh;
+	display: block;
+	height: 100vh;
+	width: 100vh;
 }
 
 .contact-layout {
@@ -161,11 +188,7 @@ div.contact-container
 	grid-template-columns: 100px 280px 800px;
 	grid-template-rows: 60px 1fr;
 	gap: 0px 0px;
-	// grid-auto-flow: row;
-	// grid-template-areas:
-	// 	". . ."
-	// 	". . .";
-	height: 100vh;
+	height: 100%;
 }
 
 .new-container {
@@ -184,6 +207,12 @@ div.contact-container
 	.input {
 		height: 100%;
 	}
+}
+
+.end-nav-container {
+	padding: 10px;
+	display: flex;
+	justify-content: end;
 }
 
 .new-contact-btn {
@@ -215,4 +244,38 @@ div.contact-container
 	margin-left: 16px;
 }
 
+@media screen and (max-width: $tablet) {
+	.contact-container {
+		height: 100vh;
+		width: 100%;
+	}
+	.contact-layout {
+		grid-template-columns: 1fr 6fr 1fr;
+		grid-template-rows: 60px 1fr;
+	}
+
+	.contact-select-container {
+		grid-area: 2 / 2 / 3 / 4;
+	}
+
+	.end-nav-container {
+		// justify-content: start;
+		padding-left: 0px;
+	}
+
+	.contact-layout.viewing {
+		// display: block;
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr;
+
+		.new-container, .alphabet-container, .search-container, .contact-select-container, .end-nav-container {
+			display: none;
+		}
+	}
+
+	.new-container {
+		padding: 10px;
+		padding-left: 8px;
+	}
+}
 </style>
