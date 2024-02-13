@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // lib
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth'
 import { useGetContact, useGetContacts } from '@/composables/ContactMethods';
 
@@ -20,7 +20,6 @@ import Alphabet from '@/components/Alphabet.vue'
 import SelectContact from '@/components/SelectContact.vue'
 import EditContact from '@/components/EditContact.vue'
 import SearchContact from '@/components/SearchContact.vue'
-import BModal from '@/blooma/BModal.vue'
 
 const authStore = useAuthStore()
 
@@ -41,11 +40,9 @@ const viewMode = ref<EditContactModes>(EditContactModes.VIEW)
 const searchQuery = ref<string>('')
 const searchMode = ref<ContactSearchModes>(ContactSearchModes.ALL)
 const renderContact = ref(true) // TODO: remove this hack
-const settingsModal = ref(false)
 
-function toggleSettings() {
-	settingsModal.value = !settingsModal.value
-	if (settingsModal.value) {
+function togglefullscreen() {
+	if (document.fullscreenElement != null) {
 		document.exitFullscreen()
 	}
 	else {
@@ -124,6 +121,8 @@ async function refreshContactsAndSelect(id: number) {
 	await selectAndGetContact(id)
 }
 
+const hasContactAndShouldRender = computed(() => contact.value && renderContact.value)
+
 onMounted(async () => {
 	await getContacts()
 })
@@ -132,7 +131,7 @@ onMounted(async () => {
 
 <template lang="pug">
 div.contact-container
-	div.contact-layout(:class="contact && renderContact ? 'viewing' : ''")
+	div.contact-layout(:class="hasContactAndShouldRender ? 'viewing' : ''")
 		div.new-container
 			BButton.new-contact-btn(:type="BloomaTypes.Primary" @click="createContact") +
 		div.search-container
@@ -143,20 +142,9 @@ div.contact-container
 				@update:searchMode="updateSearchMode"
 			)
 		div.end-nav-container
-			BButton.settings-btn(:type="BloomaTypes.Ghost" :light="true" @click="toggleSettings")
+			BButton.settings-btn(:type="BloomaTypes.Ghost" :light="true" @click="togglefullscreen")
 				span.icon
-					//- Icon(icon="material-symbols:settings" width="22")
 					Icon(icon="material-symbols:fullscreen" width="22")
-				//- BModal(v-if="settingsModal")
-				//- 	template(v-slot:header)
-				//- 		p.modal-card-title Settings
-				//- 	template(v-slot:content)
-				//- 		div
-				//- 			BButton Toggle dark mode
-				//- 		div
-				//- 			BButton Enable fullscreen
-				//- 	template(v-slot:footer)
-				//- 		BButton(:type="BloomaTypes.Default" @click="") Close
 		div.alphabet-container.scrollable
 			Alphabet(
 				v-model="searchQuery"
@@ -173,7 +161,7 @@ div.contact-container
 			)
 		div.contact-view-container.scrollable
 			EditContact(
-				v-if="contact && renderContact"
+				v-if="contact && hasContactAndShouldRender"
 				:key="contact.id"
 				:contact="contact"
 				:mode="viewMode"
