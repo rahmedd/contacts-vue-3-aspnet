@@ -40,7 +40,8 @@ const router = createRouter({
 			name: 'demo',
 			component: DemoView,
 			meta: {
-				requiresAuth: true
+				requiresAuth: false,
+				forVisitors: true,
 			}
 		},
 		{

@@ -36,9 +36,9 @@ section.has-background-warning-light
 						p.subtitle.mb-6
 							| A contacts app written in Vue 3 and ASP.NET.
 						.buttons
-							BButton(:type="BloomaTypes.Primary" @click='$router.push("/login")') Sign Up
+							BButton(:type="BloomaTypes.Primary" @click='$router.push("/demo")') Demo
+							BButton(:type="BloomaTypes.Dark" @click='$router.push("/signup")') Sign Up
 							//- a.button.is-primary(href='#') Sign up
-							BButton(:type="BloomaTypes.Dark" @click='$router.push("/login")') Login
 							//- a.button.is-dark(href='#') Log in
 				//- .column.is-12.is-6-desktop
 					//- img.image.is-fullwidth(src='example-scene.png' alt='')
