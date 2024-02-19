@@ -9,11 +9,11 @@ const router = useRouter()
 </script>
 
 <template lang="pug">
-div.home.has-background-success-light
+div.home
 	.n-bar
 		BButton(:type="BloomaTypes.Ghost" @click='$router.push("/signup")') sign up
 		BButton(:type="BloomaTypes.Ghost" @click='$router.push("/login")') login
-	div.content.has-background-success-light
+	div.content
 		h2.title.is-size-2.is-spaced.has-text-primary Contacts
 		p.subtitle.mb-6
 			| A contacts app written in Vue 3 and ASP.NET.
@@ -31,6 +31,8 @@ div.home.has-background-success-light
 
 .home {
 	height: 100dvh;
+	background: rgb(242,255,254);
+	background: linear-gradient(90deg, rgba(242,255,254,1) 0%, rgba(237,255,247,1) 70%, rgba(239,255,246,1) 100%); 
 }
 
 .content {
@@ -62,10 +64,6 @@ div.home.has-background-success-light
 
 		.title {
 			margin-top: 30%;
-		}
-
-		.subtitle {
-
 		}
 
 		.button-bar {

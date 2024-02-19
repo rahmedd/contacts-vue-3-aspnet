@@ -352,7 +352,7 @@ $gap: 20px;
 	display: flex;
 	justify-content: space-between;
 	padding: $gap $gap;
-	background: $bl-primary-light;
+	background: $bl-background-light;
 }
 
 .button-bar-left > * {
@@ -372,7 +372,7 @@ $gap: 20px;
 	.row-split {
 		margin: $gap;
 		padding: $gap;
-		outline: 1px solid $bl-primary-light;
+		outline: 1px solid $bl-background-light;
 		border-radius: 4px;
 	}
 

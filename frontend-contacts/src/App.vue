@@ -15,7 +15,7 @@ import { RouterLink, RouterView } from 'vue-router'
 }
 
 *::-webkit-scrollbar-track {
-  background: $bl-primary-light;
+  background: $bl-background-light;
 }
 
 *::-webkit-scrollbar-thumb {

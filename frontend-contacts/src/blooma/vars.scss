@@ -1,8 +1,9 @@
 @import "bulma/sass/utilities/initial-variables.sass"; // breakpoints
 $bl-app-background: #ffffff;
 $bl-background: #f9fcf8;
-$bl-background-secondary: #dcecdb;
+$bl-background-secondary: #e4f9eb;
 $bl-primary: $green;
-$bl-primary-light: #f3f7f6;
-$bl-link: green;
+$bl-primary-light: lighten($bl-primary, 43%);
+$bl-background-light: #f3f7f6;
+$bl-link: $green;
 $text-strong: #444;
