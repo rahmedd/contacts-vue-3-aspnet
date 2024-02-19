@@ -32,7 +32,8 @@ const router = createRouter({
 			name: 'signup',
 			component: SignupView,
 			meta: {
-				requiresAuth: false
+				requiresAuth: false,
+				forVisitors: true,
 			}
 		},
 		{
@@ -40,7 +41,8 @@ const router = createRouter({
 			name: 'demo',
 			component: DemoView,
 			meta: {
-				requiresAuth: true
+				requiresAuth: false,
+				forVisitors: true,
 			}
 		},
 		{

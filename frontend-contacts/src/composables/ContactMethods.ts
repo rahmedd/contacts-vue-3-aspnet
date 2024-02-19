@@ -8,6 +8,14 @@ import type BaseReponse from '@/responseTypes/BaseResponse'
 import { ContactCustomFieldResponse } from "@/responseTypes/ContactCustomFIeldResponse";
 import { Contact } from '@/requestTypes/Contact'
 import { ComposeResultState } from '@/enums/ComposeResultState'
+import { useAuthStore } from '@/stores/auth'
+import {
+	getContacts as mockGetContacts,
+	getContact as mockGetContact,
+	updateContact as mockUpdateContact,
+	createContact as mockCreateContact,
+	deleteContact as mockDeleteContact,
+} from '@/mocks/ContactRequests'
 
 export function useGetContacts():
 ComposeResult<
@@ -15,21 +23,31 @@ ComposeResult<
 	string,
 	void
 > {
-	const contact = ref<Contact[]>([])
+	const contacts = ref<Contact[]>([])
 	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
 	const error = ref<any | null>(null)
 
 	async function getContacts(searchQuery: string = '') {
+		const auth = useAuthStore()
+
 		try {
 			state.value = ComposeResultState.LOADING
+			let ret: Contact[] = []
 
-			const res: AxiosResponse<BaseReponse<Contact[]>> = await apiClient.get(`Contact`, {
-				params: {
-					searchQuery: searchQuery?.trim()
-				}
-			})
+			if (auth.demoMode) {
+				ret = mockGetContacts(searchQuery)
+			}
+			else {
+				const axiosRes: AxiosResponse<BaseReponse<Contact[]>> = await apiClient.get(`Contact`, {
+					params: {
+						searchQuery: searchQuery?.trim()
+					}
+				})
 
-			contact.value = res.data.body
+				ret = axiosRes.data.body
+			}
+
+			contacts.value = ret
 
 			state.value = ComposeResultState.SUCCESS
 		}
@@ -41,7 +59,7 @@ ComposeResult<
 
 	return {
 		state: state,
-		data: contact,
+		data: contacts,
 		action: getContacts,
 	}
 }
@@ -57,11 +75,24 @@ ComposeResult<
 	const error = ref<any | null>(null)
 
 	async function getContact(id: number) {
+		const auth = useAuthStore()
+		let ret: Contact | null = null
+
 		try {
 			state.value = ComposeResultState.LOADING
+			
+			if (auth.demoMode) {
+				const res = mockGetContact(id)
+				if (res) {
+					ret = res
+				}
+			}
+			else {
+				const res: AxiosResponse<BaseReponse<Contact>> = await apiClient.get(`Contact/${id}`)
+				ret = res.data.body
+			}
 
-			const res: AxiosResponse<BaseReponse<Contact>> = await apiClient.get(`Contact/${id}`)
-			contact.value = res.data.body
+			contact.value = ret
 
 			state.value = ComposeResultState.SUCCESS
 		}
@@ -88,16 +119,30 @@ ComposeResult<
 	const state = ref<ComposeResultState>(ComposeResultState.LOADING)
 	const error = ref<any | null>(null)
 
-	async function update(ct: Contact) {
+	async function update(updatedCt: Contact) {
+		const auth = useAuthStore()
+		let ret: Contact | null = null
+
 		try {
 			state.value = ComposeResultState.LOADING
 
-			const res: AxiosResponse<BaseReponse<ContactResponse>> = await apiClient.put(`Contact`, ct)
-			contact.value = contactToContactInternal(res.data.body)
+			if (auth.demoMode) {
+				ret = mockUpdateContact(updatedCt)
+			}
+			else {
+				const res: AxiosResponse<BaseReponse<ContactResponse>> = await apiClient.put(`Contact`, updatedCt)
+				ret = res.data.body
+			}
+			
+			if (ret) {
+				contact.value = contactToContactInternal(ret)
+			}
+			else {
+				console.log('update contact error')
+			}
 
 			state.value = ComposeResultState.SUCCESS
-
-			return res.data.body
+			return ret
 		}
 		catch (ex) {
 			console.log(ex)
@@ -124,15 +169,24 @@ ComposeResult<
 	const error = ref<any | null>(null)
 
 	async function create(ct: Contact) {
+		const auth = useAuthStore()
+		let ret: Contact | null = null
+
 		try {
 			state.value = ComposeResultState.LOADING
 
-			const res: AxiosResponse<BaseReponse<ContactResponse>> = await apiClient.post(`Contact`, ct)
-			contact.value = contactToContactInternal(res.data.body)
+			if (auth.demoMode) {
+				ret = mockCreateContact(ct)
+			}
+			else {
+				const res: AxiosResponse<BaseReponse<ContactResponse>> = await apiClient.post(`Contact`, ct)
+				ret = res.data.body	
+			}
+
+			contact.value = contactToContactInternal(ret)
 
 			state.value = ComposeResultState.SUCCESS
-
-			return res.data.body
+			return ret
 		}
 		catch (ex) {
 			console.log(ex)
@@ -159,11 +213,17 @@ export function useDeleteContact():
 	const error = ref<any | null>(null)
 
 	async function deleteContact(id: number) {
+		const auth = useAuthStore()
+
 		try {
 			state.value = ComposeResultState.LOADING
 
-			const res: AxiosResponse<BaseReponse<null>> = await apiClient.delete(`Contact/${id}`)
-			// contact.value = res.data.body
+			if (auth.demoMode) {
+				const res = mockDeleteContact(id)
+			}
+			else {
+				const res: AxiosResponse<BaseReponse<null>> = await apiClient.delete(`Contact/${id}`)
+			}
 
 			state.value = ComposeResultState.SUCCESS
 		}
