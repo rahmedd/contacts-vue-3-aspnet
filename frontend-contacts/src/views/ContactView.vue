@@ -179,7 +179,7 @@ div.contact-container
 
 .contact-container {
 	display: block;
-	height: 100vh;
+	height: 100dvh;
 	width: 100vh;
 }
 
@@ -246,7 +246,7 @@ div.contact-container
 
 @media screen and (max-width: $tablet) {
 	.contact-container {
-		height: 100vh;
+		height: 100dvh;
 		width: 100%;
 	}
 	.contact-layout {
