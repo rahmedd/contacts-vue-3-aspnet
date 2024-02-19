@@ -61,11 +61,15 @@ export const useDemoStore = defineStore(
 		}
 
 		function getContacts(searchQuery: string = '') {
+			const sq = searchQuery.toLowerCase()
+
 			if (searchQuery) {
-				return contacts.value.filter(c => 
-					(c.firstname + ' ' + c.lastname).startsWith(searchQuery) ||
-					(c.lastname + ' ' + c.firstname).startsWith(searchQuery)
-				)
+				return contacts.value.filter(c => {
+					const fn = c.firstname.toLowerCase();
+					const ln = c.lastname.toLowerCase();
+					const ret = (fn + ' ' + ln).startsWith(sq) || (ln + ' ' + fn).startsWith(sq)
+					return ret
+				})
 			}
 
 			return contacts.value
